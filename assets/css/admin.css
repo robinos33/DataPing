@@ -1,0 +1,115 @@
+/* FRONT-OFFICE */
+.fftt_plug_div{
+    margin: auto;
+    width: 95%;
+    text-align: center;
+}
+
+.fftt_plug_div table{
+    border-spacing: 0;
+    border:1px solid grey;
+    width: 100%;
+}
+
+.fftt_plug_div td{
+    border-right:1px ridge #fff;
+    padding:5px;
+}
+
+.fftt_plug_div th{
+    background-color:lightgrey;
+}
+
+.fftt_plug_div caption{
+    background-color:lightgrey;
+    border-top:1px solid grey;
+    border-right:1px solid grey;
+    border-left:1px solid grey;
+    margin: 0;
+}
+
+.fftt_plug_div tr{
+    border-collapse: collapse;
+}
+
+.fftt_plug_div tr.odd{
+    background-color:#fff;
+}
+
+.fftt_plug_div tr.even{
+    background-color:#EFEFEF;
+}
+.fftt_plug_div th.classement{
+    width:80px;
+}
+.fftt_plug_div th.equipe{
+    width:100%;
+}
+.fftt_plug_div th.joues{
+    width:80px;
+}
+.fftt_plug_div th.points{
+    width:80px;
+}
+.fftt_plug_div .center{
+    text-align:center;
+}
+
+.fftt_plug_div .left{
+    text-align:left;
+}
+
+.fftt_plug_div .right{
+    text-align:right;
+}
+.fftt_plug_div .equipe_club{
+    font-weight: bolder;
+    color:blue;
+}
+
+.fftt_plug_div .fftt_plug_rencontres_table{
+    margin:20px auto;
+    width:100%;
+    text-align: center;
+}
+
+.fftt_plug_div .equipes{
+    width:40%;
+    word-wrap: normal;
+}
+
+.fftt_plug_div .score{
+    width:8%;
+}
+
+.fftt_plug_div .center.tiret{
+    width:4%;
+}
+
+/* ADMIN */
+.fftt_plug_nonoff{
+    font-size: 15px;
+}
+
+.fftt_plug_version{
+    font-size: 10px;
+    color:grey;
+}
+
+.fftt_plug_right_box{
+    float:right;
+    padding: 10px;
+    margin:77px 20px;
+    width:20%;
+    background:#fff;
+    border:1px solid grey;
+    border-radius: 5px;
+}
+
+.fftt_plug_settings_form{
+    border:1px solid grey;
+    border-radius: 5px;
+    background: #fff;
+    padding:20px;
+    width:70%;
+}
