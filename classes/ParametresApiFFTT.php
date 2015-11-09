@@ -10,7 +10,7 @@ if (!class_exists('ParametresApiFFTT')) {
     class ParametresApiFFTT {
 
         public static function getInstance() {
-            return new Self;
+            return new self;
         }
 
         /**

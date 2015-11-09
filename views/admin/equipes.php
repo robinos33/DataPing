@@ -1,4 +1,6 @@
 <?php
+include_once(__DIR__ . '/header.php');
+
 $listeEquipesM = $this->getApi()->getEquipesByClub(ParametresApiFFTT::getInstance()->getNumClub(), 'M');
 $listeEquipesF = $this->getApi()->getEquipesByClub(ParametresApiFFTT::getInstance()->getNumClub(), 'F');
 $listeEquipes = array_merge($listeEquipesM, $listeEquipesF);

@@ -1,7 +1,7 @@
 <?php
 /*
   Plugin Name: wp-Api-FFTT
-  Plugin URI:
+  Plugin URI: http://robin-aldasoro.com/docs/wordpress-plugins/wp-Api-FFTT.zip
   Description: Ce plugin affiche les données accessibles via l'API de la FFTT
   Version: 0.1
   Author: Robin Aldasoro
@@ -15,7 +15,7 @@ require_once('classes/ParametresApiFFTT.php');
 
 class WpApiFFTT {
 
-    private $Api;
+    private $Api = null;
 
     public function __construct() {
         $this->initializeApi(ParametresApiFFTT::getInstance()->getIdApplication(), ParametresApiFFTT::getInstance()->getMotDePasse());
@@ -42,8 +42,6 @@ class WpApiFFTT {
 
             if ($init['initialisation']['appli'] === '1') {
                 $this->setApi($api);
-            } else {
-                throw new Exception('Problème lors de l\'inialisation de l\'API. Avez-vous bien rempli vos paramètres ?');
             }
         }
     }
@@ -129,6 +127,8 @@ class WpApiFFTT {
         $atts = shortcode_atts(array('iddiv' => 0, 'idpoule' => 0), $atts);
         if ($atts['iddiv'] === 0 || $atts['idpoule'] === 0) {
             echo 'Poule ou division incorrecte';
+        } else if (is_null($this->getApi())) {
+            echo 'Problème lors de la récupération des résultats';
         } else {
             $listeEquipesM = $this->getApi()->getEquipesByClub(ParametresApiFFTT::getInstance()->getNumClub(), 'M');
             $listeEquipesF = $this->getApi()->getEquipesByClub(ParametresApiFFTT::getInstance()->getNumClub(), 'F');
