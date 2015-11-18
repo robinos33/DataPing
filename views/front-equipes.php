@@ -1,8 +1,9 @@
+<?php require_once(__DIR__ . '/front-header.php'); ?>
 <div class="fftt_plug_div">
     <?php
     foreach ($listeEquipes as $equipe) {
         if ($atts['iddiv'] === $equipe['iddiv'] && $atts['idpoule'] === $equipe['idpoule']) {
-            $classementPoule = $this->getApi()->getPouleClassement($equipe['iddiv'], $equipe['idpoule']);
+            $classementPoule = $api->getPouleClassement($equipe['iddiv'], $equipe['idpoule']);
             ?>
             <h4><?php echo $equipe['libdivision'] . ' - ' . $equipe['libequipe']; ?></h4>
             <h5>Classement</h5>
@@ -39,7 +40,7 @@
                     </tr>
                 <?php } ?>
             </table>
-            <?php $rencontresPoule = $this->getApi()->getPouleRencontres($equipe['iddiv'], $equipe['idpoule']); ?>
+            <?php $rencontresPoule = $api->getPouleRencontres($equipe['iddiv'], $equipe['idpoule']); ?>
             <h5>Résultats par journée</h5>
             <?php
             $numJournee = 0;

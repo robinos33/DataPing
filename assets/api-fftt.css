@@ -86,6 +86,37 @@
     width:4%;
 }
 
+/* Joueurs */
+.fftt_plug_div .listeJoueurs th{
+   font-size: 13px;
+   text-align: center;
+   vertical-align: middle; 
+}
+
+.fftt_plug_div .listeJoueurs td{
+    font-size:11px;
+}
+
+span.rouge {
+    color: red;
+}
+span.vert {
+    color: green;
+}
+/* table sorter */
+th.header {
+    background-image: url(tablesorter/img/bg.gif); 
+    background: no-repeat center right lightgray;
+    cursor: pointer; 
+}
+th.headerSortDown { 
+    background-image: url(tablesorter/img/desc.gif); 
+} 
+
+th.headerSortUp { 
+    background-image: url(tablesorter/img/asc.gif); 
+} 
+
 /* ADMIN */
 .fftt_plug_nonoff{
     font-size: 15px;

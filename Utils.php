@@ -7,3 +7,22 @@ class ConstantesApiFFTT {
     const WP_API_FFTT_NUM_CLUB = 'wp_Api_FFTT_num_club';
 
 }
+
+/**
+ * Autoloading des models
+ */
+function autoload_fft_models() {
+    $repertoireModels = __DIR__ . '/models/';
+    $models = glob($repertoireModels . "*.php");
+    foreach ($models as $model) {
+        require_once $model;
+    }
+}
+
+function getSessionApi() {
+    return $_SESSION['api'];
+}
+
+function setSessionApi($api) {
+    $_SESSION['api'] = $api;
+}

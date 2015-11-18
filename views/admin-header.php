@@ -3,7 +3,7 @@
     <p class="fftt_plug_author">Par <?php echo $pluginData['Author']; ?></p>
     <?php
 }
-if (!is_object($this->getApi()) && $_GET['page'] !== 'parametres_wpApiFFTT') {
+if (!is_object(getSessionApi()) && $_GET['page'] !== 'parametres_wpApiFFTT') {
     ?>
     <div class="wrap">
         <h1 class="fftt_plug_title">Les équipes </h1>

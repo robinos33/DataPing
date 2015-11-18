@@ -3,26 +3,33 @@
   Plugin Name: wp-Api-FFTT
   Plugin URI: http://robin-aldasoro.com/docs/wordpress-plugins/wp-Api-FFTT.zip
   Description: Ce plugin affiche les données accessibles via l'API de la FFTT
-  Version: 0.1
+  Version: 0.2.3
   Author: Robin Aldasoro
   Author URI: robin-aldasoro.com
   License: GPLv2
  */
 
 require_once('Utils.php');
-require_once('classes/AccesApi.php');
-require_once('classes/ParametresApiFFTT.php');
+// autoloading des models
+autoload_fft_models();
 
 class WpApiFFTT {
 
-    private $Api = null;
+    /**
+     * Types possibles  de listes de joueurs  à insérer dans les shortcodes
+     * @var array
+     */
+    private $typeListeJoueurs = array(
+        'M', 'F', 'MF'
+    );
 
     public function __construct() {
         $this->initializeApi(ParametresApiFFTT::getInstance()->getIdApplication(), ParametresApiFFTT::getInstance()->getMotDePasse());
         add_action('admin_menu', array($this, 'add_admin_menu'));
         add_action('admin_init', array($this, 'register_settings'));
-        add_action('init', array($this, 'admin_style_scripts'));
+        add_action('init', array($this, 'api_fftt_style_scripts'));
         add_shortcode('equipe', array($this, 'equipes_front'));
+        add_shortcode('joueurs', array($this, 'joueurs_front'));
     }
 
     /**
@@ -41,7 +48,7 @@ class WpApiFFTT {
             $init = $api->initialization();
 
             if ($init['initialisation']['appli'] === '1') {
-                $this->setApi($api);
+                setSessionApi($api);
             }
         }
     }
@@ -54,7 +61,7 @@ class WpApiFFTT {
 
     public function admin_module() {
         $pluginData = $this->getPluginData();
-        require_once(__DIR__ . '/views/admin/admin.php');
+        require_once(__DIR__ . '/views/admin.php');
     }
 
     public function getPluginData() {
@@ -62,10 +69,17 @@ class WpApiFFTT {
         return $datas;
     }
 
-    public function admin_style_scripts() {
-        wp_register_style('admin-css', plugins_url('/assets/css/admin.css', __FILE__), true);
+    public function api_fftt_style_scripts() {
+        //Styles
+        wp_register_style('admin-css', plugins_url('/assets/api-fftt.css', __FILE__), true);
         wp_enqueue_style('admin-css');
-        //wp_enqueue_script( 'script-name', get_template_directory_uri() . '/js/example.js', array(), '1.0.0', true );
+        //Javascript
+        wp_register_script('api-fftt-js', plugins_url('/assets/api-fftt.js', __FILE__), 'jquery', '1.0', true);
+        wp_register_script('table-sorter', plugins_url('/assets/tablesorter/jquery.tablesorter.min.js', __FILE__), 'jquery', '1.0', true);
+        wp_register_script('table-sorter-pager', plugins_url('/assets/tablesorter/jquery.tablesorter.pager.js', __FILE__), 'jquery', '1.0', true);
+        wp_enqueue_script('api-fftt-js');
+        wp_enqueue_script('table-sorter');
+        wp_enqueue_script('table-sorter-pager');
     }
 
     public function register_settings() {
@@ -114,46 +128,54 @@ class WpApiFFTT {
     //  </editor-fold>
     //  <editor-fold desc="Gestion des differents sous menus">
     public function equipes_admin() {
-        require_once(__DIR__ . '/views/admin/equipes.php');
+        require_once(__DIR__ . '/views/admin-equipes.php');
     }
 
     public function joueurs_admin() {
-        echo 'Cette fonctionnalité n\'est pas encore disponible';
+        require_once(__DIR__ . '/views/admin-joueurs.php');
     }
 
     // </editor-fold>
     // <editor-fold desc="Gestion des shortcodes">
     public function equipes_front($atts, $content) {
+        $api = getSessionApi();
         $atts = shortcode_atts(array('iddiv' => 0, 'idpoule' => 0), $atts);
         if ($atts['iddiv'] === 0 || $atts['idpoule'] === 0) {
-            echo 'Poule ou division incorrecte';
-        } else if (is_null($this->getApi())) {
-            echo 'Problème lors de la récupération des résultats';
+            return 'Poule ou division incorrecte';
+        } else if (is_null($api)) {
+            return 'Problème lors de la récupération des résultats';
         } else {
-            $listeEquipesM = $this->getApi()->getEquipesByClub(ParametresApiFFTT::getInstance()->getNumClub(), 'M');
-            $listeEquipesF = $this->getApi()->getEquipesByClub(ParametresApiFFTT::getInstance()->getNumClub(), 'F');
+            $listeEquipesM = $api->getEquipesByClub(ParametresApiFFTT::getInstance()->getNumClub(), 'M');
+            $listeEquipesF = $api->getEquipesByClub(ParametresApiFFTT::getInstance()->getNumClub(), 'F');
             $listeEquipes = array_merge($listeEquipesM, $listeEquipesF);
-            require_once(__DIR__ . '/views/front/equipes.php');
+
+            require_once(__DIR__ . '/views/front-equipes.php');
+            return ob_get_clean();
         }
     }
 
-    public function joueurs_front() {
-
+    /**
+     * Méthode qui gère les liste de joueurs coté front
+     * @param type $atts type: M | F | MF
+     * @param type $content
+     */
+    public function joueurs_front($atts, $content) {
+        $atts = shortcode_atts(array('type' => 'MF'), $atts);
+        if (in_array($atts['type'], $this->getTypeListeJoueurs())) {
+            $listeJoueurs = array();
+            $joueurs = new Joueurs($atts['type']);
+            require_once(__DIR__ . '/views/front-joueurs.php');
+            return ob_get_clean();
+        } else {
+            return 'Erreur de paramètres du shortcode';
+        }
     }
 
     //  </editor-fold>
     // <editor-fold desc="Getters & setters">
 
-    function getApi() {
-        return $this->Api;
-    }
-
-    /**
-     *
-     * @param AccesApi $AccesApi
-     */
-    function setApi($AccesApi) {
-        $this->Api = $AccesApi;
+    private function getTypeListeJoueurs() {
+        return $this->typeListeJoueurs;
     }
 
 // </editor-fold>
