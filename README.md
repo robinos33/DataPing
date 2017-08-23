@@ -1,4 +1,4 @@
-# wp-Api-FFTT
+# DataPing
 
 Plugin Wordpress non-officiel d'affichage des données issues de l'API de Fédération Française de Tennis de Table.
 
