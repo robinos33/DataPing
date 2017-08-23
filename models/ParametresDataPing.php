@@ -1,13 +1,13 @@
 <?php
 
-if (!class_exists('ParametresApiFFTT')) {
+if (!class_exists('ParametresDataPing')) {
 
     /**
      * Description of parametres
      *
      * @author robin
      */
-    class ParametresApiFFTT {
+    class ParametresDataPing {
 
         public static function getInstance() {
             return new self;
@@ -18,9 +18,9 @@ if (!class_exists('ParametresApiFFTT')) {
          */
         private function getParametresFromDatabase() {
             global $wpdb;
-            $params['idApplication'] = get_option(ConstantesApiFFTT::WP_API_FFTT_ID_APPLICATION);
-            $params['motDePasse'] = get_option(ConstantesApiFFTT::WP_API_FFTT_MOT_DE_PASSE);
-            $params['numClub'] = get_option(ConstantesApiFFTT::WP_API_FFTT_NUM_CLUB);
+            $params['idApplication'] = get_option(ConstantesDataPing::DATAPING_ID_APPLICATION);
+            $params['motDePasse'] = get_option(ConstantesDataPing::DATAPING_MOT_DE_PASSE);
+            $params['numClub'] = get_option(ConstantesDataPing::DATAPING_NUM_CLUB);
             return $params;
         }
 

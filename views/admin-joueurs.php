@@ -2,9 +2,9 @@
 include_once(__DIR__ . '/admin-header.php');
 ?>
 <div class="wrap">
-    <h1 class="fftt_plug_title">Les joueurs </h1>
+    <h1 class="DataPing_title">Les joueurs </h1>
     <p>Insérez le shortcode dans la page ou l'article où vous désirez afficher la liste des joueurs</p>
-    <form class="fftt_plug_liste_admin">
+    <form class="DataPing_liste_admin">
         <table class="wp-list-table widefat fixed striped posts">
             <thead>
                 <tr>

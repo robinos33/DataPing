@@ -1,4 +1,4 @@
-=== wp-Api-FFTT ===
+=== DataPing ===
 Tags: ping, tennis de table, ping pong, resultats championnat, api fftt 
 Requires at least: 3.2
 Tested up to: 3.4

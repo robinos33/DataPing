@@ -1,5 +1,5 @@
 <?php require_once(__DIR__ . '/front-header.php'); ?>
-<div class="fftt_plug_div">
+<div class="DataPing_div">
     <table class="listeJoueurs sortableTable">
         <thead>
         <th width="135">Nom</th>

@@ -1,5 +1,5 @@
 <?php require_once(__DIR__ . '/front-header.php'); ?>
-<div class="fftt_plug_div">
+<div class="DataPing_div">
     <?php
     foreach ($listeEquipes as $equipe) {
         if ($atts['iddiv'] === $equipe['iddiv'] && $atts['idpoule'] === $equipe['idpoule']) {
@@ -53,7 +53,7 @@
                     $journee = $rencontre['libelle'];
                     $numJournee++;
 
-                    echo '<table class="fftt_plug_rencontres_table" id=\'journee' . $numJournee . '\'>';
+                    echo '<table class="DataPing_rencontres_table" id=\'journee' . $numJournee . '\'>';
                     echo '<caption colspan="5" class="center">' . $journee . '</caption>';
                 }
                 ?>

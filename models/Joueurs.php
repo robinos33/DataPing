@@ -16,8 +16,8 @@ if (!class_exists('joueurs')) {
         private $joueurs;
 
         public function __construct() {
-            $api = getSessionApi();
-            $licencies = $api->getLicencesByClub(ParametresApiFFTT::getInstance()->getNumClub());
+            $api = getSessionFFTTApi();
+            $licencies = $api->getLicencesByClub(ParametresDataPing::getInstance()->getNumClub());
             $this->setJoueursFromApi($licencies);
         }
 
@@ -45,7 +45,7 @@ if (!class_exists('joueurs')) {
          * @param array $listeJoueurs
          */
         public function setJoueursFromApi($listeJoueurs) {
-            $api = getSessionApi();
+            $api = getSessionFFTTApi();
             foreach ($listeJoueurs as $joueur) {
                 $donneesLicence = $api->getLicence($joueur['licence']);
                 $donneesClassement = $api->getJoueur($joueur['licence']);

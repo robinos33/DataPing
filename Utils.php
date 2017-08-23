@@ -1,17 +1,17 @@
 <?php
 
-class ConstantesApiFFTT {
+class ConstantesDataPing {
 
-    const WP_API_FFTT_ID_APPLICATION = 'wp_Api_FFTT_id_application';
-    const WP_API_FFTT_MOT_DE_PASSE = 'wp_Api_FFTT_mot_de_passe';
-    const WP_API_FFTT_NUM_CLUB = 'wp_Api_FFTT_num_club';
+    const DATAPING_ID_APPLICATION = 'DataPing_id_application';
+    const DATAPING_MOT_DE_PASSE = 'DataPing_mot_de_passe';
+    const DATAPING_NUM_CLUB = 'DataPing_num_club';
 
 }
 
 /**
  * Autoloading des models
  */
-function autoload_fft_models() {
+function autoload_dataPing_models() {
     $repertoireModels = __DIR__ . '/models/';
     $models = glob($repertoireModels . "*.php");
     foreach ($models as $model) {
@@ -19,10 +19,12 @@ function autoload_fft_models() {
     }
 }
 
-function getSessionApi() {
+function getSessionFFTTApi() {
     return $_SESSION['api'];
 }
 
 function setSessionApi($api) {
     $_SESSION['api'] = $api;
 }
+
+autoload_dataPing_models();

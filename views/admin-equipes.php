@@ -1,14 +1,14 @@
 <?php
 include_once(__DIR__ . '/admin-header.php');
-$api = getSessionApi();
-$listeEquipesM = $api->getEquipesByClub(ParametresApiFFTT::getInstance()->getNumClub(), 'M');
-$listeEquipesF = $api->getEquipesByClub(ParametresApiFFTT::getInstance()->getNumClub(), 'F');
+$api = getSessionFFTTApi();
+$listeEquipesM = $api->getEquipesByClub(ParametresDataPing::getInstance()->getNumClub(), 'M');
+$listeEquipesF = $api->getEquipesByClub(ParametresDataPing::getInstance()->getNumClub(), 'F');
 $listeEquipes = array_merge($listeEquipesM, $listeEquipesF);
 ?>
 <div class="wrap">
-    <h1 class="fftt_plug_title">Les équipes </h1>
+    <h1 class="DataPing_title">Les équipes </h1>
     <p>Insérez le shortcode dans la page ou l'article où vous désirez afficher la poule de chaque équipe</p>
-    <form class="fftt_plug_liste_admin">
+    <form class="DataPing_liste_admin">
         <table class="wp-list-table widefat fixed striped posts">
             <thead>
                 <tr>
