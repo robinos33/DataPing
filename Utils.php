@@ -19,12 +19,4 @@ function autoload_dataPing_models() {
     }
 }
 
-function getSessionFFTTApi() {
-    return $_SESSION['api'];
-}
-
-function setSessionApi($api) {
-    $_SESSION['api'] = $api;
-}
-
 autoload_dataPing_models();

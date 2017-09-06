@@ -2,21 +2,15 @@
 
 if (!class_exists('ParametresDataPing')) {
 
-    /**
-     * Description of parametres
-     *
-     * @author robin
-     */
-    class ParametresDataPing {
 
-        public static function getInstance() {
-            return new self;
-        }
+    class ParametresDataPing
+    {
 
         /**
          * @return array $params
          */
-        private function getParametresFromDatabase() {
+        private static function getParametresFromDatabase()
+        {
             global $wpdb;
             $params['idApplication'] = get_option(ConstantesDataPing::DATAPING_ID_APPLICATION);
             $params['motDePasse'] = get_option(ConstantesDataPing::DATAPING_MOT_DE_PASSE);
@@ -24,18 +18,21 @@ if (!class_exists('ParametresDataPing')) {
             return $params;
         }
 
-        public function getIdApplication() {
-            $params = $this->getParametresFromDatabase();
+        public static function getIdApplication()
+        {
+            $params = self::getParametresFromDatabase();
             return $params['idApplication'];
         }
 
-        public function getMotDePasse() {
-            $params = $this->getParametresFromDatabase();
+        public static function getMotDePasse()
+        {
+            $params = self::getParametresFromDatabase();
             return $params['motDePasse'];
         }
 
-        public function getNumClub() {
-            $params = $this->getParametresFromDatabase();
+        public static function getNumClub()
+        {
+            $params = self::getParametresFromDatabase();
             return $params['numClub'];
         }
 

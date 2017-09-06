@@ -1,8 +1,6 @@
 <?php
-include_once(__DIR__ . '/admin-header.php');
-$api = getSessionFFTTApi();
-$listeEquipesM = $api->getEquipesByClub(ParametresDataPing::getInstance()->getNumClub(), 'M');
-$listeEquipesF = $api->getEquipesByClub(ParametresDataPing::getInstance()->getNumClub(), 'F');
+$listeEquipesM = $api->getEquipesByClub(ParametresDataPing::getNumClub(), 'M');
+$listeEquipesF = $api->getEquipesByClub(ParametresDataPing::getNumClub(), 'F');
 $listeEquipes = array_merge($listeEquipesM, $listeEquipesF);
 ?>
 <div class="wrap">

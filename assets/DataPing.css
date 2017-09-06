@@ -144,3 +144,11 @@ th.headerSortUp {
     padding:20px;
     width:70%;
 }
+
+.dataping_page_joueurs_DataPing tr.F td{
+    color: #faafaa;
+}
+
+.dataping_page_joueurs_DataPing tr.M td{
+    color: #0063ff;
+}

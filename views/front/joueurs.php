@@ -1,4 +1,4 @@
-<?php require_once(__DIR__ . '/front-header.php'); ?>
+<?php require_once(__DIR__ . '/header.php'); ?>
 <div class="DataPing_div">
     <table class="listeJoueurs sortableTable">
         <thead>

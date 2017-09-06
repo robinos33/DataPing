@@ -4,7 +4,6 @@
     </p>
 </div>
 <?php
-require_once(__DIR__ . '/admin-header.php');
 $this->getForm();
 ?>
 

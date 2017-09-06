@@ -24,7 +24,6 @@ class DataPing
 
     public function __construct()
     {
-        $this->initializeApi(ParametresDataPing::getInstance()->getIdApplication(), ParametresDataPing::getInstance()->getMotDePasse());
         add_action('admin_menu', array($this, 'add_admin_menu'));
         add_action('admin_init', array($this, 'register_settings'));
         add_action('init', array($this, 'dataping_style_scripts'));
@@ -32,42 +31,19 @@ class DataPing
         add_shortcode('joueurs', array($this, 'joueurs_front'));
     }
 
-    /**
-     * Intialisation de l'appel à l'API FFTT
-     * @param string $idApplication
-     * @param string $motdePasse
-     */
-    private function initializeApi($idApplication, $motdePasse)
-    {
-        if (!is_null($idApplication) && !is_null($motdePasse)) {
-            $api = new AccesFFTTApi($idApplication, $motdePasse);
-            if (empty($_SESSION['serial'])) {
-                $_SESSION['serial'] = AccesFFTTApi::generateSerial();
-            }
-
-            $api->setSerial($_SESSION['serial']);
-            $init = $api->initialization();
-
-            if ($init['initialisation']['appli'] === '1') {
-                setSessionApi($api);
-            }
-        }
-    }
-
     public function add_admin_menu()
     {
-        add_menu_page('Donnees FFTT', 'Données FFTT', 'manage_options', 'parametres_wpApiFFTT', array($this, 'admin_module'));
-        add_submenu_page('parametres_wpApiFFTT', 'Equipes', 'Equipes', 'manage_options', 'equipes_wpApiFFTT', array($this, 'equipes_admin'));
-        add_submenu_page('parametres_wpApiFFTT', 'Joueurs', 'Joueurs', 'manage_options', 'joueurs_wpApiFFTT', array($this, 'joueurs_admin'));
+        add_menu_page('DataPing', 'DataPing', 'manage_options', 'parametres_DataPing', array($this, 'admin_module'));
+        add_submenu_page('parametres_DataPing', 'Equipes', 'Equipes', 'manage_options', 'equipes_DataPing', array($this, 'equipes_admin'));
+        add_submenu_page('parametres_DataPing', 'Joueurs', 'Joueurs', 'manage_options', 'joueurs_DataPing', array($this, 'joueurs_admin'));
     }
 
     public function admin_module()
     {
-        $pluginData = $this->getPluginData();
-        require_once(__DIR__ . '/views/admin.php');
+        $this->_getLayout('admin');
     }
 
-    public function getPluginData()
+    public static function getPluginData()
     {
         $datas = get_plugin_data(__FILE__);
         return $datas;
@@ -140,29 +116,35 @@ class DataPing
 
     public function equipes_admin()
     {
-        require_once(__DIR__ . '/views/admin-equipes.php');
+        $this->_getLayout('equipes');
     }
 
     public function joueurs_admin()
     {
-        require_once(__DIR__ . '/views/admin-joueurs.php');
+        $this->_getLayout('joueurs');
+    }
+
+    private function _getLayout($view){
+        include_once(__DIR__ . '/views/admin/layout.php');
     }
 
     public function equipes_front($atts, $content)
     {
-        $api = getSessionFFTTApi();
-        $atts = shortcode_atts(array('iddiv' => 0, 'idpoule' => 0), $atts);
-        if ($atts['iddiv'] === 0 || $atts['idpoule'] === 0) {
-            return 'Poule ou division incorrecte';
-        } else if (is_null($api)) {
-            return 'Problème lors de la récupération des résultats';
-        } else {
-            $listeEquipesM = $api->getEquipesByClub(ParametresDataPing::getInstance()->getNumClub(), 'M');
-            $listeEquipesF = $api->getEquipesByClub(ParametresDataPing::getInstance()->getNumClub(), 'F');
-            $listeEquipes = array_merge($listeEquipesM, $listeEquipesF);
+        $api = AccesFFTTApi::getInstance();
+        if (is_object($api)) {
+            $atts = shortcode_atts(array('iddiv' => 0, 'idpoule' => 0), $atts);
+            if ($atts['iddiv'] === 0 || $atts['idpoule'] === 0) {
+                return 'Poule ou division incorrecte';
+            } else if (is_null($api)) {
+                return 'Problème lors de la récupération des résultats';
+            } else {
+                $listeEquipesM = $api->getEquipesByClub(ParametresDataPing::getNumClub(), 'M');
+                $listeEquipesF = $api->getEquipesByClub(ParametresDataPing::getNumClub(), 'F');
+                $listeEquipes = array_merge($listeEquipesM, $listeEquipesF);
 
-            require_once(__DIR__ . '/views/front-equipes.php');
-            return ob_get_clean();
+                require_once(__DIR__ . '/views/front/equipes.php');
+                return ob_get_clean();
+            }
         }
     }
 
@@ -178,7 +160,7 @@ class DataPing
         if (in_array($atts['type'], $this->getTypeListeJoueurs())) {
             $listeJoueurs = array();
             $joueurs = new Joueurs($atts['type']);
-            require_once(__DIR__ . '/views/front-joueurs.php');
+            require_once(__DIR__ . '/views/front/joueurs.php');
             return ob_get_clean();
         } else {
             return 'Erreur de paramètres du shortcode';

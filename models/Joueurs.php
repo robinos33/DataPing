@@ -9,6 +9,7 @@ if (!class_exists('joueurs')) {
      */
     class Joueurs {
 
+        private $_api;
         /**
          * Tableau contenant les joueurs du club
          * @var array Joueur
@@ -16,8 +17,8 @@ if (!class_exists('joueurs')) {
         private $joueurs;
 
         public function __construct() {
-            $api = getSessionFFTTApi();
-            $licencies = $api->getLicencesByClub(ParametresDataPing::getInstance()->getNumClub());
+            $this->_api = AccesFFTTApi::getInstance();
+            $licencies = $this->_api->getLicencesByClub(ParametresDataPing::getNumClub());
             $this->setJoueursFromApi($licencies);
         }
 
@@ -45,10 +46,9 @@ if (!class_exists('joueurs')) {
          * @param array $listeJoueurs
          */
         public function setJoueursFromApi($listeJoueurs) {
-            $api = getSessionFFTTApi();
             foreach ($listeJoueurs as $joueur) {
-                $donneesLicence = $api->getLicence($joueur['licence']);
-                $donneesClassement = $api->getJoueur($joueur['licence']);
+                $donneesLicence = $this->_api->getLicence($joueur['licence']);
+                $donneesClassement = $this->_api->getJoueur($joueur['licence']);
                 if (!is_null($donneesLicence) && !is_null($donneesClassement)) {
                     $this->joueurs[] = new Joueur($donneesLicence, $donneesClassement);
                 }

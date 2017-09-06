@@ -21,7 +21,7 @@ class Club {
     private $site;
 
     public function __construct($numClub) {
-        $api = getSessionFFTTApi();
+        $api = AccesFFTTApi::getInstance();
         $club = $api->getClub($numClub);
         //$this->initSalle($club);
         $this->setSite($club['web']);
