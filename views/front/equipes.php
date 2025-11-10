@@ -77,6 +77,18 @@
                 //echo 'numjournée : ' . $numJournee . ' rencontresPoules : ' . count($rencontre) . '<br />';
             }
             echo '</table>';
+            // Affiche la date de dernière mise à jour (cache demi-journée)
+            if (method_exists($api, 'getCacheUpdatedAt')) {
+                $u1 = $api->getCacheUpdatedAt('poule_classement', array('D1' => $equipe['iddiv'], 'cx_poule' => $equipe['idpoule']));
+                $u2 = $api->getCacheUpdatedAt('poule_rencontres', array('D1' => $equipe['iddiv'], 'cx_poule' => $equipe['idpoule']));
+                $updated = 0;
+                if ($u1 !== false) { $updated = (int) max($updated, $u1); }
+                if ($u2 !== false) { $updated = (int) max($updated, $u2); }
+                if ($updated > 0) {
+                    $formatted = function_exists('date_i18n') ? date_i18n('d/m/Y H:i', $updated, false) : date('d/m/Y H:i', $updated);
+                    echo '<p class="dataping-last-update">Dernière mise à jour: ' . esc_html($formatted) . '</p>';
+                }
+            }
         }
         ?>
         <?php

@@ -11,6 +11,8 @@ if (!class_exists('AccesFFTTApi')) {
 
         private static $_instance = null;
 
+        private $cache;
+
         /**
          * @var string $appId ID de l'application fourni par la FFTT (ex: AM001)
          */
@@ -166,7 +168,11 @@ if (!class_exists('AccesFFTTApi')) {
                 $type = 'M';
             }
 
-            $teams = AccesFFTTApi::getCollection($this->getData('http://www.fftt.com/mobile/pxml/xml_equipe.php', array('numclu' => $club, 'type' => $type)), 'equipe');
+            $key = $this->buildCacheKey('equipes_club', array('numclu' => $club, 'type' => $type));
+            $lifeTime = $this->computeHalfDayTtl();
+            $teams = $this->getCachedData($key, $lifeTime, function () use ($club, $type) {
+                return AccesFFTTApi::getCollection($this->getData('http://www.fftt.com/mobile/pxml/xml_equipe.php', array('numclu' => $club, 'type' => $type)), 'equipe');
+            });
 
             foreach ($teams as &$team) {
                 $params = array();
@@ -196,12 +202,20 @@ if (!class_exists('AccesFFTTApi')) {
 
         public function getPouleClassement($division, $poule = null)
         {
-            return AccesFFTTApi::getCollection($this->getData('http://www.fftt.com/mobile/pxml/xml_result_equ.php', array('auto' => 1, 'action' => 'classement', 'D1' => $division, 'cx_poule' => $poule)), 'classement');
+            $key = $this->buildCacheKey('poule_classement', array('D1' => $division, 'cx_poule' => $poule));
+            $lifeTime = $this->computeHalfDayTtl();
+            return $this->getCachedData($key, $lifeTime, function () use ($division, $poule) {
+                return AccesFFTTApi::getCollection($this->getData('http://www.fftt.com/mobile/pxml/xml_result_equ.php', array('auto' => 1, 'action' => 'classement', 'D1' => $division, 'cx_poule' => $poule)), 'classement');
+            });
         }
 
         public function getPouleRencontres($division, $poule = null)
         {
-            return AccesFFTTApi::getCollection($this->getData('http://www.fftt.com/mobile/pxml/xml_result_equ.php', array('auto' => 1, 'D1' => $division, 'cx_poule' => $poule)), 'tour');
+            $key = $this->buildCacheKey('poule_rencontres', array('D1' => $division, 'cx_poule' => $poule));
+            $lifeTime = $this->computeHalfDayTtl();
+            return $this->getCachedData($key, $lifeTime, function () use ($division, $poule) {
+                return AccesFFTTApi::getCollection($this->getData('http://www.fftt.com/mobile/pxml/xml_result_equ.php', array('auto' => 1, 'D1' => $division, 'cx_poule' => $poule)), 'tour');
+            });
         }
 
         public function getIndivGroupes($division)
@@ -288,21 +302,62 @@ if (!class_exists('AccesFFTTApi')) {
 
         private function getCachedData($key, $lifeTime, $callback)
         {
-            if (!$this->cache) {
+            // Use WordPress transients when available; otherwise, bypass cache
+            if (!function_exists('get_transient') || !function_exists('set_transient')) {
                 return $callback($this);
             }
 
-            if (false === ($data = $this->cache->fetch($key))) {
-                if ($this->autoInitialization && false == $this->cache->fetch($initKey = 'xml_initialisation')) {
-                    $this->initialization();
-                    $this->cache->save($initKey, 'init', 3600 * 4 + mt_rand(0, 3600 * 4)); // Entre 4 et 8h
-                }
-
+            $data = get_transient($key);
+            if ($data === false) {
                 $data = $callback($this);
-                $this->cache->save($key, $data, $lifeTime);
+                // Store data and last update timestamp
+                set_transient($key, $data, (int) $lifeTime);
+                set_transient($key . '__updated_at', time(), (int) $lifeTime);
             }
 
             return $data;
+        }
+
+        private function buildCacheKey($prefix, array $params)
+        {
+            ksort($params);
+            $base = $prefix . '|' . http_build_query($params);
+            return 'dataping_' . md5($base);
+        }
+
+        private function computeHalfDayTtl()
+        {
+            // Use WP local time if available
+            $now = function_exists('current_time') ? (int) current_time('timestamp') : time();
+
+            // Define target times today at 08:00 and 13:00
+            $today = getdate($now);
+            $mk = function ($hour) use ($today) {
+                return mktime($hour, 0, 0, $today['mon'], $today['mday'], $today['year']);
+            };
+            $t8 = $mk(8);
+            $t13 = $mk(13);
+
+            if ($now < $t8) {
+                $next = $t8;
+            } elseif ($now < $t13) {
+                $next = $t13;
+            } else {
+                // Next day 08:00
+                $next = $t8 + 86400;
+            }
+            $ttl = max(60, $next - $now);
+            return $ttl;
+        }
+
+        public function getCacheUpdatedAt($prefix, array $params)
+        {
+            if (!function_exists('get_transient')) {
+                return false;
+            }
+            $key = $this->buildCacheKey($prefix, $params) . '__updated_at';
+            $ts = get_transient($key);
+            return $ts === false ? false : (int) $ts;
         }
 
         public function getData($url, $params = array(), $generateHash = true)
