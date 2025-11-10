@@ -11,8 +11,6 @@ if (!class_exists('AccesFFTTApi')) {
 
         private static $_instance = null;
 
-        private $cache;
-
         /**
          * @var string $appId ID de l'application fourni par la FFTT (ex: AM001)
          */
@@ -40,20 +38,22 @@ if (!class_exists('AccesFFTTApi')) {
                 $this->appId = ParametresDataPing::getIdApplication();
                 $this->appKey = ParametresDataPing::getMotDePasse();
 
+                // Démarre une session si nécessaire (certaines installations WP n'utilisent pas les sessions par défaut)
+                if (function_exists('session_status') && session_status() !== PHP_SESSION_ACTIVE && !headers_sent()) {
+                    @session_start();
+                }
+
                 if (empty($_SESSION['serial'])) {
                     $_SESSION['serial'] = AccesFFTTApi::generateSerial();
                 }
 
                 $this->setSerial($_SESSION['serial']);
-                $init = $this->initialization();
-
-                if ($init['initialisation']['appli'] === '1') {
-                    return $this;
-                }
+                // Initialise l'application si possible (les éventuelles erreurs XML sont gérées en interne)
+                $this->initialization();
             }
 
+            // Assure que les erreurs libxml n'interrompent pas l'exécution
             libxml_use_internal_errors(true);
-            return null;
         }
 
         public static function getInstance()
