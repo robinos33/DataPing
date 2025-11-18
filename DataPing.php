@@ -45,19 +45,22 @@ class DataPing
 
     public static function getPluginData()
     {
+        if (!function_exists('get_plugin_data')) {
+            require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
         $datas = get_plugin_data(__FILE__);
         return $datas;
     }
 
     public function dataping_style_scripts()
     {
-        //Styles
-        wp_register_style('admin-css', plugins_url('/assets/DataPing.css', __FILE__), true);
+        // Styles
+        wp_register_style('admin-css', plugins_url('/assets/DataPing.css', __FILE__), array(), '1.0');
         wp_enqueue_style('admin-css');
-        //Javascript
-        wp_register_script('dataping-js', plugins_url('/assets/DataPing.js', __FILE__), 'jquery', '1.0', true);
-        wp_register_script('table-sorter', plugins_url('/assets/tablesorter/jquery.tablesorter.min.js', __FILE__), 'jquery', '1.0', true);
-        wp_register_script('table-sorter-pager', plugins_url('/assets/tablesorter/jquery.tablesorter.pager.js', __FILE__), 'jquery', '1.0', true);
+        // Javascript
+        wp_register_script('dataping-js', plugins_url('/assets/DataPing.js', __FILE__), array('jquery'), '1.0', true);
+        wp_register_script('table-sorter', plugins_url('/assets/tablesorter/jquery.tablesorter.min.js', __FILE__), array('jquery'), '1.0', true);
+        wp_register_script('table-sorter-pager', plugins_url('/assets/tablesorter/jquery.tablesorter.pager.js', __FILE__), array('jquery', 'table-sorter'), '1.0', true);
         wp_enqueue_script('dataping-js');
         wp_enqueue_script('table-sorter');
         wp_enqueue_script('table-sorter-pager');
@@ -85,7 +88,7 @@ class DataPing
     {
         ?>
         <input type="text" name="DataPing_id_application"
-               value="<?php echo get_option(ConstantesDataPing::DATAPING_ID_APPLICATION); ?>"/>
+               value="<?php echo esc_attr(get_option(ConstantesDataPing::DATAPING_ID_APPLICATION)); ?>"/>
         <?php
     }
 
@@ -93,7 +96,7 @@ class DataPing
     {
         ?>
         <input type="text" name="DataPing_mot_de_passe"
-               value="<?php echo get_option(ConstantesDataPing::DATAPING_MOT_DE_PASSE); ?>"/>
+               value="<?php echo esc_attr(get_option(ConstantesDataPing::DATAPING_MOT_DE_PASSE)); ?>"/>
         <?php
     }
 
@@ -101,7 +104,7 @@ class DataPing
     {
         ?>
         <input type="text" name="DataPing_num_club"
-               value="<?php echo get_option(ConstantesDataPing::DATAPING_NUM_CLUB); ?>"/>
+               value="<?php echo esc_attr(get_option(ConstantesDataPing::DATAPING_NUM_CLUB)); ?>"/>
         <?php
     }
 
@@ -131,21 +134,25 @@ class DataPing
     public function equipes_front($atts, $content)
     {
         $api = AccesFFTTApi::getInstance();
-        if (is_object($api)) {
-            $atts = shortcode_atts(array('iddiv' => 0, 'idpoule' => 0), $atts);
-            if ($atts['iddiv'] === 0 || $atts['idpoule'] === 0) {
-                return 'Poule ou division incorrecte';
-            } else if (is_null($api)) {
-                return 'Problème lors de la récupération des résultats';
-            } else {
-                $listeEquipesM = $api->getEquipesByClub(ParametresDataPing::getNumClub(), 'M');
-                $listeEquipesF = $api->getEquipesByClub(ParametresDataPing::getNumClub(), 'F');
-                $listeEquipes = array_merge($listeEquipesM, $listeEquipesF);
-
-                require_once(__DIR__ . '/views/front/equipes.php');
-                return ob_get_clean();
-            }
+        if (!is_object($api)) {
+            return __('Problème lors de la récupération des résultats', 'dataping');
         }
+
+        // Normalise et valide les attributs du shortcode
+        $atts = shortcode_atts(array('iddiv' => '', 'idpoule' => ''), (array) $atts, 'equipe');
+        $atts['iddiv'] = (string) $atts['iddiv'];
+        $atts['idpoule'] = (string) $atts['idpoule'];
+        if ($atts['iddiv'] === '' || $atts['idpoule'] === '') {
+            return __('Poule ou division incorrecte', 'dataping');
+        }
+
+        $listeEquipesM = $api->getEquipesByClub(ParametresDataPing::getNumClub(), 'M');
+        $listeEquipesF = $api->getEquipesByClub(ParametresDataPing::getNumClub(), 'F');
+        $listeEquipes = array_merge((array) $listeEquipesM, (array) $listeEquipesF);
+
+        ob_start();
+        require __DIR__ . '/views/front/equipes.php';
+        return ob_get_clean();
     }
 
     /**
@@ -156,15 +163,15 @@ class DataPing
      */
     public function joueurs_front($atts, $content)
     {
-        $atts = shortcode_atts(array('type' => 'MF'), $atts);
-        if (in_array($atts['type'], $this->getTypeListeJoueurs())) {
+        $atts = shortcode_atts(array('type' => 'MF'), (array) $atts, 'joueurs');
+        if (in_array($atts['type'], $this->getTypeListeJoueurs(), true)) {
             $listeJoueurs = array();
             $joueurs = new Joueurs($atts['type']);
-            require_once(__DIR__ . '/views/front/joueurs.php');
+            ob_start();
+            require __DIR__ . '/views/front/joueurs.php';
             return ob_get_clean();
-        } else {
-            return 'Erreur de paramètres du shortcode';
         }
+        return __('Erreur de paramètres du shortcode', 'dataping');
     }
 
     private function getTypeListeJoueurs()
