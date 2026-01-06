@@ -285,17 +285,39 @@ class DataPing
         try {
             $numClub = ParametresDataPing::getNumClub();
             $syncResults = array();
+            $debugLog = array();
+
+            // Vérifier les paramètres de connexion
+            if (empty($numClub)) {
+                throw new Exception('Numéro de club non configuré');
+            }
+            $debugLog[] = "Numéro de club: " . $numClub;
+
+            $idApp = ParametresDataPing::getIdApplication();
+            $motDePasse = ParametresDataPing::getMotDePasse();
+            if (empty($idApp) || empty($motDePasse)) {
+                throw new Exception('Identifiants API FFTT non configurés');
+            }
+            $debugLog[] = "ID Application: " . $idApp;
 
             // Synchronisation des joueurs
             $api->clearJoueursCache($numClub);
+            $debugLog[] = "Cache joueurs effacé";
+
             $joueurs = new Joueurs();
-            $syncResults['joueurs'] = count($joueurs->getJoueurs('MF'));
+            $joueursListe = $joueurs->getJoueurs('MF');
+            $syncResults['joueurs'] = count($joueursListe);
+            $debugLog[] = "Joueurs récupérés: " . $syncResults['joueurs'];
 
             // Synchronisation des équipes
             $api->clearEquipesCache($numClub);
+            $debugLog[] = "Cache équipes effacé";
+
             $equipesM = $api->getEquipesByClub($numClub, 'M');
             $equipesF = $api->getEquipesByClub($numClub, 'F');
             $syncResults['equipes'] = count($equipesM) + count($equipesF);
+            $debugLog[] = "Équipes M récupérées: " . count($equipesM);
+            $debugLog[] = "Équipes F récupérées: " . count($equipesF);
 
             // Pour chaque équipe, synchroniser classements et rencontres
             $allEquipes = array_merge($equipesM, $equipesF);
@@ -313,7 +335,8 @@ class DataPing
             wp_send_json_success(array(
                 'message' => 'Synchronisation réussie',
                 'timestamp' => current_time('mysql'),
-                'results' => $syncResults
+                'results' => $syncResults,
+                'debug' => $debugLog
             ));
         } catch (Exception $e) {
             wp_send_json_error(array('message' => 'Erreur lors de la synchronisation: ' . $e->getMessage()));

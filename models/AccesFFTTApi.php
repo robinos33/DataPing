@@ -375,11 +375,25 @@ if (!class_exists('AccesFFTTApi')) {
                 "Connection: Keep-Alive",
             ));
             $data = curl_exec($curl);
+            $curlError = curl_error($curl);
+            $curlErrno = curl_errno($curl);
+            $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
             curl_close($curl);
+
+            // Log des erreurs cURL
+            if ($curlErrno !== 0) {
+                error_log("DataPing - Erreur cURL ($curlErrno): $curlError - URL: $url");
+                return false;
+            }
+
+            if ($httpCode !== 200) {
+                error_log("DataPing - Code HTTP $httpCode - URL: $url");
+            }
 
             $xml = simplexml_load_string($data);
 
             if (!$xml) {
+                error_log("DataPing - Erreur parsing XML - URL: $url - Data: " . substr($data, 0, 500));
                 return false;
             }
 

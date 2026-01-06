@@ -62,11 +62,23 @@ jQuery(document).ready(function($) {
                 $button.prop('disabled', false);
 
                 if (response.success) {
-                    $message.html('<div class="notice notice-success is-dismissible"><p><strong>Succès !</strong> ' + response.data.message + '</p></div>');
+                    console.log('DataPing Sync - Résultats:', response.data.results);
+                    if (response.data.debug) {
+                        console.log('DataPing Sync - Debug:', response.data.debug);
+                    }
+
+                    var details = '';
+                    if (response.data.results) {
+                        details = '<br><small>Joueurs: ' + (response.data.results.joueurs || 0) +
+                                 ' | Équipes: ' + (response.data.results.equipes || 0) + '</small>';
+                    }
+
+                    $message.html('<div class="notice notice-success is-dismissible"><p><strong>Succès !</strong> ' + response.data.message + details + '</p></div>');
                     setTimeout(function() {
                         location.reload();
                     }, 1500);
                 } else {
+                    console.error('DataPing Sync - Erreur:', response.data);
                     $message.html('<div class="notice notice-error is-dismissible"><p><strong>Erreur :</strong> ' + response.data.message + '</p></div>');
                 }
             },
