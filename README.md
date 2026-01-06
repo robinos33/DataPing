@@ -6,7 +6,15 @@ Plugin Wordpress non-officiel d'affichage des données issues de l'API de Fédé
 
 ### Changelog
 
-**Version actuelle : v0.2.3**
+**Version actuelle : v0.3.0**
+
+* Optimisation des appels API - Suppression des endpoints inutiles (historique parties, tournois)
+* Simplification des données stockées en cache
+* Ajout des champs catégorie et étranger pour les joueurs
+* Ajout de hooks WordPress pour exposer les données en cache aux autres plugins
+* Conservation uniquement des données de base : sexe, étranger, catégorie, points (mensuels et officiels), progressions
+
+**Version : v0.2.3**
 
 * Correction de divers bugs
 * Affichage des resultats des joueurs
@@ -15,6 +23,68 @@ Plugin Wordpress non-officiel d'affichage des données issues de l'API de Fédé
 
 * Gestion simple des paramètres de l'API
 * Gestion simple de l'affichage des résultats des équipes d'un club
+
+----------------------------------------------------------------------------------
+
+### Hooks WordPress disponibles
+
+Le plugin expose désormais les données en cache via des hooks WordPress, permettant à d'autres plugins d'accéder aux données sans faire de nouveaux appels API.
+
+#### 1. Récupérer les joueurs
+
+```php
+// Récupérer tous les joueurs (hommes et femmes)
+$joueurs = apply_filters('dataping_get_joueurs', 'MF');
+
+// Récupérer uniquement les joueurs masculins
+$joueurs_hommes = apply_filters('dataping_get_joueurs', 'M');
+
+// Récupérer uniquement les joueuses féminines
+$joueurs_femmes = apply_filters('dataping_get_joueurs', 'F');
+```
+
+Retourne un tableau d'objets `Joueur` avec les propriétés suivantes :
+- `getNom()` : Nom du joueur
+- `getPrenom()` : Prénom du joueur
+- `getSexe()` : Sexe (M/F)
+- `getCategorie()` : Catégorie d'âge
+- `isEtranger()` : Booléen indiquant si le joueur est étranger
+- `getClassement()->getPointsMensuels()` : Points mensuels
+- `getClassement()->getPointsOfficiels()` : Points officiels
+- `getClassement()->getProgressionAnnuelle()` : Progression annuelle
+
+#### 2. Récupérer les équipes
+
+```php
+// Récupérer toutes les équipes
+$equipes = apply_filters('dataping_get_equipes', null);
+
+// Récupérer uniquement les équipes masculines
+$equipes_hommes = apply_filters('dataping_get_equipes', 'M');
+
+// Récupérer uniquement les équipes féminines
+$equipes_femmes = apply_filters('dataping_get_equipes', 'F');
+```
+
+#### 3. Récupérer le classement d'une poule
+
+```php
+$classement = apply_filters('dataping_get_classement_poule', null, array(
+    'division' => 'D1',
+    'poule' => 'A'
+));
+```
+
+#### 4. Récupérer les rencontres d'une poule
+
+```php
+$rencontres = apply_filters('dataping_get_rencontres_poule', null, array(
+    'division' => 'D1',
+    'poule' => 'A'
+));
+```
+
+**Note** : Toutes les données retournées proviennent du cache WordPress (transients) avec une durée de vie de demi-journée (8h00, 13h00, lendemain 8h00).
 
 ----------------------------------------------------------------------------------
 

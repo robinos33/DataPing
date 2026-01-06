@@ -10,6 +10,8 @@ if (!class_exists('joueur')) {
         private $licence;
         private $club;
         private $classement;
+        private $categorie;
+        private $etranger;
 
         /**
          * Initialisation du joueur
@@ -23,6 +25,8 @@ if (!class_exists('joueur')) {
             $this->setPrenom($donneesLicence['prenom']);
             $this->setSexe($donneesLicence['sexe']);
             $this->setLicence($donneesLicence['numclub']);
+            $this->setCategorie($donneesClassement['cat'] ?? '');
+            $this->setEtranger($donneesClassement['natio'] ?? 'F');
         }
 
         public function getNom() {
@@ -76,6 +80,27 @@ if (!class_exists('joueur')) {
 
         public function setClassement($donneesClassement) {
             $this->classement = new Classement($donneesClassement);
+        }
+
+        public function getCategorie() {
+            return $this->categorie;
+        }
+
+        public function setCategorie($categorie) {
+            $this->categorie = $categorie;
+        }
+
+        public function getEtranger() {
+            return $this->etranger;
+        }
+
+        public function setEtranger($natio) {
+            // Si natio != 'F', c'est un joueur étranger
+            $this->etranger = ($natio !== 'F');
+        }
+
+        public function isEtranger() {
+            return $this->etranger;
         }
 
     }

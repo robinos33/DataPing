@@ -137,20 +137,6 @@ if (!class_exists('AccesFFTTApi')) {
             return $joueur;
         }
 
-        public function getJoueurParties($licence)
-        {
-            return AccesFFTTApi::getCollection($this->getData('http://www.fftt.com/mobile/pxml/xml_partie_mysql.php', array('licence' => $licence, 'auto' => 1)), 'partie');
-        }
-
-        public function getJoueurPartiesSpid($licence)
-        {
-            return AccesFFTTApi::getCollection($this->getData('http://www.fftt.com/mobile/pxml/xml_partie.php', array('numlic' => $licence)), 'resultat');
-        }
-
-        public function getJoueurHistorique($licence)
-        {
-            return AccesFFTTApi::getCollection($this->getData('http://www.fftt.com/mobile/pxml/xml_histo_classement.php', array('numlic' => $licence)), 'histo');
-        }
 
         public function getJoueursByName($nom, $prenom = '')
         {
@@ -218,72 +204,6 @@ if (!class_exists('AccesFFTTApi')) {
             });
         }
 
-        public function getIndivGroupes($division)
-        {
-            $groupes = AccesFFTTApi::getCollection($this->getData('http://www.fftt.com/mobile/pxml/xml_result_indiv.php', array('action' => 'poule', 'res_division' => $division)), 'tour');
-
-            foreach ($groupes as &$groupe) {
-                $params = array();
-                parse_str($groupe['lien'], $params);
-
-                if (isset($params['cx_tableau'])) {
-                    $groupe['idgroupe'] = $params['cx_tableau'];
-                } else {
-                    $groupe['idgroupe'] = null;
-                }
-                $groupe['iddiv'] = $params['res_division'];
-            }
-
-            return $groupes;
-        }
-
-        public function getGroupeClassement($division, $groupe = null)
-        {
-            return AccesFFTTApi::getCollection($this->getData('http://www.fftt.com/mobile/pxml/xml_result_indiv.php', array('action' => 'classement', 'res_division' => $division, 'cx_tableau' => $groupe)), 'classement');
-        }
-
-        public function getGroupeRencontres($division, $groupe = null)
-        {
-            return AccesFFTTApi::getCollection($this->getData('http://www.fftt.com/mobile/pxml/xml_result_indiv.php', array('action' => 'partie', 'res_division' => $division, 'cx_tableau' => $groupe)), 'partie');
-        }
-
-        public function getOrganismes($type)
-        {
-            // Zone / Ligue / Departement
-            if (!in_array($type, array('Z', 'L', 'D'))) {
-                $type = 'L';
-            }
-
-            return AccesFFTTApi::getCollection($this->getData('http://www.fftt.com/mobile/pxml/xml_organisme.php', array('type' => $type)), 'organisme');
-        }
-
-        public function getEpreuves($organisme, $type)
-        {
-            // Equipe / Individuelle
-            if (!in_array($type, array('E', 'I'))) {
-                $type = 'E';
-            }
-
-            return AccesFFTTApi::getCollection($this->getData('http://www.fftt.com/mobile/pxml/xml_epreuve.php', array('type' => $type, 'organisme' => $organisme)), 'epreuve');
-        }
-
-        public function getDivisions($organisme, $epreuve, $type = 'E')
-        {
-            // Equipe / Individuelle
-            if (!in_array($type, array('E', 'I'))) {
-                $type = 'E';
-            }
-
-            return AccesFFTTApi::getCollection($this->getData('http://www.fftt.com/mobile/pxml/xml_division.php', array('organisme' => $organisme, 'epreuve' => $epreuve, 'type' => $type)), 'division');
-        }
-
-        public function getRencontre($link)
-        {
-            $params = array();
-            parse_str($link, $params);
-
-            return AccesFFTTApi::getObject($this->getData('http://www.fftt.com/mobile/pxml/xml_chp_renc.php', $params), null);
-        }
 
         public function getLicencesByName($nom, $prenom = '')
         {
