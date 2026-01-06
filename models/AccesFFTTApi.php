@@ -103,7 +103,8 @@ if (!class_exists('AccesFFTTApi')) {
 
         public function initialization()
         {
-            return AccesFFTTApi::getObject($this->getData('http://www.fftt.com/mobile/pxml/xml_initialisation.php', array()));
+            // L'API xml_initialisation.php retourne souvent une réponse vide, on ignore les erreurs de parsing
+            return AccesFFTTApi::getObject($this->getData('http://www.fftt.com/mobile/pxml/xml_initialisation.php', array(), true, true));
         }
 
         public function getClubsByDepartement($departement)
@@ -356,7 +357,7 @@ if (!class_exists('AccesFFTTApi')) {
             delete_transient($key . '__updated_at');
         }
 
-        public function getData($url, $params = array(), $generateHash = true)
+        public function getData($url, $params = array(), $generateHash = true, $silentErrors = false)
         {
             if ($generateHash) {
                 $params['serie'] = $this->getSerial();
@@ -392,18 +393,24 @@ if (!class_exists('AccesFFTTApi')) {
 
             // Log des erreurs cURL
             if ($curlErrno !== 0) {
-                error_log("DataPing - Erreur cURL ($curlErrno): $curlError - URL: $url");
+                if (!$silentErrors) {
+                    error_log("DataPing - Erreur cURL ($curlErrno): $curlError - URL: $url");
+                }
                 return false;
             }
 
             if ($httpCode !== 200) {
-                error_log("DataPing - Code HTTP $httpCode - URL: $url");
+                if (!$silentErrors) {
+                    error_log("DataPing - Code HTTP $httpCode - URL: $url");
+                }
             }
 
             $xml = simplexml_load_string($data);
 
             if (!$xml) {
-                error_log("DataPing - Erreur parsing XML - URL: $url - Data: " . substr($data, 0, 500));
+                if (!$silentErrors) {
+                    error_log("DataPing - Erreur parsing XML - URL: $url - Data: " . substr($data, 0, 500));
+                }
                 return false;
             }
 

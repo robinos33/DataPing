@@ -62,7 +62,7 @@ tail -f wp-content/debug.log | grep "DataPing"
 **Types d'erreurs possibles :**
 - `DataPing - Erreur cURL` : problème de connexion réseau
 - `DataPing - Code HTTP XXX` : l'API FFTT a retourné une erreur
-- `DataPing - Erreur parsing XML` : la réponse de l'API est invalide
+- `DataPing - Erreur parsing XML` : la réponse de l'API est invalide (sauf pour xml_initialisation.php qui est ignorée)
 
 ### 5. Cas d'erreur courants
 
@@ -74,6 +74,7 @@ tail -f wp-content/debug.log | grep "DataPing"
 | `Erreur cURL (6): Could not resolve host` | Problème réseau | Vérifier la connexion internet du serveur |
 | `Code HTTP 401` | Identifiants invalides | Vérifier l'ID et le mot de passe API |
 | `Code HTTP 500` | Erreur serveur FFTT | Réessayer plus tard |
+| `Erreur parsing XML - xml_initialisation.php` | L'API retourne une réponse vide | **Normal** - Cette erreur est désormais ignorée automatiquement |
 
 ## Flux de synchronisation
 
