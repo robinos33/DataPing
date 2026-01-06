@@ -319,6 +319,11 @@ class DataPing
             $debugLog[] = "Équipes M récupérées: " . count($equipesM);
             $debugLog[] = "Équipes F récupérées: " . count($equipesF);
 
+            // Vérifier si aucune donnée n'a été récupérée
+            if ($syncResults['joueurs'] === 0 && $syncResults['equipes'] === 0) {
+                throw new Exception('Aucune donnée récupérée. Vérifiez vos identifiants API et le numéro de club.');
+            }
+
             // Pour chaque équipe, synchroniser classements et rencontres
             $allEquipes = array_merge($equipesM, $equipesF);
             foreach ($allEquipes as $equipe) {
@@ -339,7 +344,10 @@ class DataPing
                 'debug' => $debugLog
             ));
         } catch (Exception $e) {
-            wp_send_json_error(array('message' => 'Erreur lors de la synchronisation: ' . $e->getMessage()));
+            wp_send_json_error(array(
+                'message' => 'Erreur lors de la synchronisation: ' . $e->getMessage(),
+                'debug' => isset($debugLog) ? $debugLog : array()
+            ));
         }
     }
 

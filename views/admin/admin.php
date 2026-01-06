@@ -37,6 +37,23 @@ if (isset($_GET['settings-updated']) && $_GET['settings-updated']) {
 
     <h2>Paramètres de l'API FFTT</h2>
     <?php $this->getForm(); ?>
+
+    <h2>Aide et diagnostic</h2>
+    <div class="notice notice-info">
+        <p><strong>En cas d'erreur lors de la synchronisation :</strong></p>
+        <ol>
+            <li>Vérifiez que tous les paramètres ci-dessus sont correctement renseignés</li>
+            <li>Assurez-vous que le numéro de club est correct (format: 8 chiffres, ex: 10330011)</li>
+            <li>Vérifiez que vos identifiants API sont valides (obtenus auprès de la FFTT)</li>
+            <li>Consultez les logs d'erreur dans <code>wp-content/debug.log</code> pour plus de détails</li>
+        </ol>
+        <p><strong>Erreurs fréquentes :</strong></p>
+        <ul>
+            <li><em>Aucune donnée récupérée</em> : Identifiants API invalides ou numéro de club incorrect</li>
+            <li><em>Erreur parsing XML</em> : L'API FFTT a retourné une réponse vide (vérifiez que le club existe)</li>
+            <li><em>Erreur cURL</em> : Problème de connexion réseau du serveur</li>
+        </ul>
+    </div>
 </div>
 
 <script type="text/javascript">
@@ -79,7 +96,13 @@ jQuery(document).ready(function($) {
                     }, 1500);
                 } else {
                     console.error('DataPing Sync - Erreur:', response.data);
-                    $message.html('<div class="notice notice-error is-dismissible"><p><strong>Erreur :</strong> ' + response.data.message + '</p></div>');
+                    var errorHtml = '<div class="notice notice-error is-dismissible"><p><strong>Erreur :</strong> ' + response.data.message + '</p>';
+                    if (response.data.debug) {
+                        errorHtml += '<p><small>Consultez les logs pour plus de détails</small></p>';
+                        console.error('DataPing Sync - Debug:', response.data.debug);
+                    }
+                    errorHtml += '</div>';
+                    $message.html(errorHtml);
                 }
             },
             error: function() {
