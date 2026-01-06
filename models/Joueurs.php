@@ -14,7 +14,7 @@ if (!class_exists('joueurs')) {
          * Tableau contenant les joueurs du club
          * @var array Joueur
          */
-        private $joueurs;
+        private $joueurs = [];
 
         public function __construct() {
             $this->_api = AccesFFTTApi::getInstance();
