@@ -35,6 +35,12 @@ class DataPing
         add_filter('dataping_get_equipes', array($this, 'get_equipes_data'), 10, 1);
         add_filter('dataping_get_classement_poule', array($this, 'get_classement_poule_data'), 10, 2);
         add_filter('dataping_get_rencontres_poule', array($this, 'get_rencontres_poule_data'), 10, 2);
+
+        // AJAX handler pour la synchronisation manuelle
+        add_action('wp_ajax_dataping_sync', array($this, 'handle_ajax_sync'));
+
+        // Widget dashboard
+        add_action('wp_dashboard_setup', array($this, 'add_dashboard_widget'));
     }
 
     public function add_admin_menu()
@@ -253,6 +259,172 @@ class DataPing
             return array();
         }
         return $api->getPouleRencontres($params['division'], $params['poule']);
+    }
+
+    /**
+     * Handler AJAX pour la synchronisation manuelle des données
+     */
+    public function handle_ajax_sync()
+    {
+        check_ajax_referer('dataping_sync_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => 'Permissions insuffisantes'));
+            return;
+        }
+
+        $api = AccesFFTTApi::getInstance();
+        if (!is_object($api)) {
+            wp_send_json_error(array('message' => 'Erreur de connexion à l\'API FFTT'));
+            return;
+        }
+
+        try {
+            $numClub = ParametresDataPing::getNumClub();
+            $syncResults = array();
+
+            // Synchronisation des équipes
+            $api->clearEquipesCache($numClub);
+            $equipesM = $api->getEquipesByClub($numClub, 'M');
+            $equipesF = $api->getEquipesByClub($numClub, 'F');
+            $syncResults['equipes'] = count($equipesM) + count($equipesF);
+
+            // Pour chaque équipe, synchroniser classements et rencontres
+            $allEquipes = array_merge($equipesM, $equipesF);
+            foreach ($allEquipes as $equipe) {
+                if (isset($equipe['iddiv']) && isset($equipe['idpoule'])) {
+                    $api->clearPouleCache($equipe['iddiv'], $equipe['idpoule']);
+                    $api->getPouleClassement($equipe['iddiv'], $equipe['idpoule']);
+                    $api->getPouleRencontres($equipe['iddiv'], $equipe['idpoule']);
+                }
+            }
+
+            // Enregistrer l'horodatage de la dernière synchronisation
+            update_option('dataping_last_sync', time());
+
+            wp_send_json_success(array(
+                'message' => 'Synchronisation réussie',
+                'timestamp' => current_time('mysql'),
+                'results' => $syncResults
+            ));
+        } catch (Exception $e) {
+            wp_send_json_error(array('message' => 'Erreur lors de la synchronisation: ' . $e->getMessage()));
+        }
+    }
+
+    /**
+     * Récupère l'horodatage de la dernière synchronisation
+     * @return int|false Timestamp de la dernière sync ou false
+     */
+    public static function getLastSyncTimestamp()
+    {
+        return get_option('dataping_last_sync', false);
+    }
+
+    /**
+     * Ajoute le widget au dashboard WordPress
+     */
+    public function add_dashboard_widget()
+    {
+        wp_add_dashboard_widget(
+            'dataping_sync_widget',
+            'DataPing - Synchronisation',
+            array($this, 'render_dashboard_widget')
+        );
+    }
+
+    /**
+     * Affiche le contenu du widget dashboard
+     */
+    public function render_dashboard_widget()
+    {
+        $lastSync = self::getLastSyncTimestamp();
+        ?>
+        <div class="dataping-dashboard-widget">
+            <?php if ($lastSync): ?>
+                <?php
+                $syncDate = date_i18n(get_option('date_format') . ' à ' . get_option('time_format'), $lastSync);
+                $timeDiff = human_time_diff($lastSync, current_time('timestamp'));
+                ?>
+                <p>
+                    <strong>Dernière synchronisation :</strong><br>
+                    <?php echo esc_html($syncDate); ?><br>
+                    <small style="color: #666;">(il y a <?php echo esc_html($timeDiff); ?>)</small>
+                </p>
+            <?php else: ?>
+                <p><em>Aucune synchronisation effectuée</em></p>
+            <?php endif; ?>
+
+            <p>
+                <button id="dataping-dashboard-sync-button" class="button button-primary button-large" style="width: 100%;">
+                    <span class="dashicons dashicons-update" style="vertical-align: middle;"></span>
+                    Synchroniser les données
+                </button>
+            </p>
+
+            <div id="dataping-dashboard-sync-loading" style="display: none; text-align: center; margin: 10px 0;">
+                <span class="spinner is-active" style="float: none; margin: 0;"></span>
+                <span style="vertical-align: middle; margin-left: 5px;">Synchronisation en cours...</span>
+            </div>
+
+            <div id="dataping-dashboard-sync-message" style="margin-top: 10px;"></div>
+        </div>
+
+        <script type="text/javascript">
+        jQuery(document).ready(function($) {
+            $('#dataping-dashboard-sync-button').on('click', function(e) {
+                e.preventDefault();
+                var $button = $(this);
+                var $loading = $('#dataping-dashboard-sync-loading');
+                var $message = $('#dataping-dashboard-sync-message');
+
+                $button.prop('disabled', true);
+                $loading.show();
+                $message.html('');
+
+                $.ajax({
+                    url: ajaxurl,
+                    type: 'POST',
+                    data: {
+                        action: 'dataping_sync',
+                        nonce: '<?php echo wp_create_nonce('dataping_sync_nonce'); ?>'
+                    },
+                    success: function(response) {
+                        $loading.hide();
+                        $button.prop('disabled', false);
+
+                        if (response.success) {
+                            $message.html('<div class="notice notice-success inline"><p><strong>Succès !</strong> ' + response.data.message + '</p></div>');
+                            setTimeout(function() {
+                                location.reload();
+                            }, 1500);
+                        } else {
+                            $message.html('<div class="notice notice-error inline"><p><strong>Erreur :</strong> ' + response.data.message + '</p></div>');
+                        }
+                    },
+                    error: function() {
+                        $loading.hide();
+                        $button.prop('disabled', false);
+                        $message.html('<div class="notice notice-error inline"><p><strong>Erreur :</strong> Erreur de communication avec le serveur</p></div>');
+                    }
+                });
+            });
+        });
+        </script>
+
+        <style>
+        .dataping-dashboard-widget p {
+            margin: 10px 0;
+        }
+        .dataping-dashboard-widget .notice.inline {
+            margin: 10px 0 0 0;
+            padding: 8px 12px;
+        }
+        .dataping-dashboard-widget .spinner {
+            visibility: visible;
+        }
+        </style>
+        <?php
     }
 }
 

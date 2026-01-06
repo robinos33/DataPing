@@ -280,6 +280,44 @@ if (!class_exists('AccesFFTTApi')) {
             return $ts === false ? false : (int) $ts;
         }
 
+        /**
+         * Supprime le cache des équipes d'un club
+         * @param string $club Numéro du club
+         */
+        public function clearEquipesCache($club)
+        {
+            if (!function_exists('delete_transient')) {
+                return;
+            }
+
+            $types = array('M', 'F');
+            foreach ($types as $type) {
+                $key = $this->buildCacheKey('equipes_club', array('numclu' => $club, 'type' => $type));
+                delete_transient($key);
+                delete_transient($key . '__updated_at');
+            }
+        }
+
+        /**
+         * Supprime le cache d'une poule (classement et rencontres)
+         * @param string $division Division
+         * @param string $poule Poule
+         */
+        public function clearPouleCache($division, $poule)
+        {
+            if (!function_exists('delete_transient')) {
+                return;
+            }
+
+            $keyClassement = $this->buildCacheKey('poule_classement', array('D1' => $division, 'cx_poule' => $poule));
+            delete_transient($keyClassement);
+            delete_transient($keyClassement . '__updated_at');
+
+            $keyRencontres = $this->buildCacheKey('poule_rencontres', array('D1' => $division, 'cx_poule' => $poule));
+            delete_transient($keyRencontres);
+            delete_transient($keyRencontres . '__updated_at');
+        }
+
         public function getData($url, $params = array(), $generateHash = true)
         {
             if ($generateHash) {
