@@ -157,7 +157,11 @@ if (!class_exists('AccesFFTTApi')) {
             $key = $this->buildCacheKey('equipes_club', array('numclu' => $club, 'type' => $type));
             $lifeTime = $this->computeHalfDayTtl();
             $teams = $this->getCachedData($key, $lifeTime, function () use ($club, $type) {
-                return AccesFFTTApi::getCollection($this->getData('http://www.fftt.com/mobile/pxml/xml_equipe.php', array('numclu' => $club, 'type' => $type)), 'equipe');
+                $data = $this->getData('http://www.fftt.com/mobile/pxml/xml_equipe.php', array('numclu' => $club, 'type' => $type));
+                error_log("DataPing - getEquipesByClub($club, $type) - getData result: " . (is_array($data) ? json_encode($data) : gettype($data)));
+                $result = AccesFFTTApi::getCollection($data, 'equipe');
+                error_log("DataPing - getEquipesByClub($club, $type) - getCollection result count: " . count($result));
+                return $result;
             });
 
             foreach ($teams as &$team) {
@@ -212,7 +216,11 @@ if (!class_exists('AccesFFTTApi')) {
 
         public function getLicencesByClub($club)
         {
-            return AccesFFTTApi::getCollection($this->getData('http://www.fftt.com/mobile/pxml/xml_liste_joueur.php', array('club' => $club)), 'joueur');
+            $data = $this->getData('http://www.fftt.com/mobile/pxml/xml_liste_joueur.php', array('club' => $club));
+            error_log("DataPing - getLicencesByClub($club) - getData result: " . (is_array($data) ? json_encode($data) : gettype($data)));
+            $result = AccesFFTTApi::getCollection($data, 'joueur');
+            error_log("DataPing - getLicencesByClub($club) - getCollection result count: " . count($result));
+            return $result;
         }
 
         public function getLicence($licence)
@@ -360,6 +368,8 @@ if (!class_exists('AccesFFTTApi')) {
             if (!empty($params)) {
                 $url .= '?' . http_build_query($params);
             }
+
+            error_log("DataPing - Appel API: $url");
 
             $curl = curl_init();
             curl_setopt($curl, CURLOPT_URL, $url);

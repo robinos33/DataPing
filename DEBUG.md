@@ -114,13 +114,71 @@ tail -f wp-content/debug.log | grep "DataPing"
 - Logs console.log pour le debug navigateur
 - Logs console.error en cas d'erreur
 
-## Test rapide
+## Script de test automatique
 
-Pour tester si l'API FFTT fonctionne, essayer manuellement :
+Un script de test a été créé pour diagnostiquer rapidement les problèmes :
 
 ```bash
-# Remplacer XXX par vos paramètres
-curl "http://www.fftt.com/mobile/pxml/xml_liste_joueur.php?club=08350194&id=AM001&serie=YOUR_SERIAL&tm=20260106123456789&tmc=YOUR_HASH"
+# Depuis le navigateur, accéder à :
+http://votresite.com/wp-content/plugins/DataPing/test-api-fftt.php
 ```
 
-Si cela retourne du XML, l'API fonctionne. Sinon, le problème vient des identifiants ou du réseau.
+Ce script affichera :
+- Les paramètres configurés (club, ID app, mot de passe masqué)
+- Le nombre de licenciés récupérés
+- Le nombre d'équipes M/F récupérées
+- Les détails du premier résultat de chaque catégorie
+- Les instructions pour consulter les logs
+
+## Logs PHP détaillés
+
+Maintenant, chaque appel API est loggé avec :
+- L'URL complète appelée (avec tous les paramètres)
+- Les erreurs cURL éventuelles
+- Les codes HTTP retournés
+- Le contenu de la réponse (premiers 500 caractères si erreur)
+- Le nombre de résultats retournés par chaque méthode
+
+Pour consulter les logs en temps réel :
+
+```bash
+# Sur le serveur WordPress
+tail -f /var/log/apache2/error.log | grep DataPing
+
+# Ou selon la config PHP
+tail -f /var/log/php_errors.log | grep DataPing
+
+# Dans wp-content
+tail -f wp-content/debug.log | grep DataPing
+```
+
+**Exemple de logs attendus lors d'une synchronisation réussie :**
+```
+[07-Jan-2026 10:30:15] DataPing - Appel API: http://www.fftt.com/mobile/pxml/xml_liste_joueur.php?club=10330011&serie=ABC123&id=SX059&tm=20260107103015123&tmc=a1b2c3d4e5f6...
+[07-Jan-2026 10:30:16] DataPing - getLicencesByClub(10330011) - getData result: {"joueur":[{"licence":"1234567",...}]}
+[07-Jan-2026 10:30:16] DataPing - getLicencesByClub(10330011) - getCollection result count: 25
+```
+
+**Exemple de logs en cas d'erreur :**
+```
+[07-Jan-2026 10:30:15] DataPing - Appel API: http://www.fftt.com/mobile/pxml/xml_liste_joueur.php?club=10330011&serie=ABC123&id=SX059&tm=20260107103015123&tmc=a1b2c3d4e5f6...
+[07-Jan-2026 10:30:16] DataPing - Code HTTP 401 - URL: http://www.fftt.com/mobile/pxml/xml_liste_joueur.php?club=...
+[07-Jan-2026 10:30:16] DataPing - Erreur parsing XML - URL: http://www.fftt.com/mobile/pxml/xml_liste_joueur.php?club=... - Data: <?xml version="1.0"?><error>Identifiants invalides</error>
+[07-Jan-2026 10:30:16] DataPing - getLicencesByClub(10330011) - getData result: boolean
+[07-Jan-2026 10:30:16] DataPing - getLicencesByClub(10330011) - getCollection result count: 0
+```
+
+## Test rapide manuel
+
+Pour tester l'API FFTT manuellement depuis la ligne de commande :
+
+```bash
+# Les paramètres seront visibles dans les logs après une synchro
+# Copiez l'URL complète depuis les logs et testez-la :
+curl "http://www.fftt.com/mobile/pxml/xml_liste_joueur.php?club=10330011&serie=ABC&id=SX059&tm=20260107103015123&tmc=xxx"
+```
+
+Si cela retourne du XML valide avec des joueurs, l'API fonctionne. Sinon :
+- `<error>` dans le XML → identifiants invalides
+- Timeout → problème réseau
+- HTTP 4xx/5xx → erreur serveur FFTT
