@@ -238,11 +238,21 @@ if (!class_exists('AccesFFTTApi')) {
             return $data;
         }
 
+        public function getCachedDataPublic($key, $lifeTime, $callback)
+        {
+            return $this->getCachedData($key, $lifeTime, $callback);
+        }
+
         private function buildCacheKey($prefix, array $params)
         {
             ksort($params);
             $base = $prefix . '|' . http_build_query($params);
             return 'dataping_' . md5($base);
+        }
+
+        public function buildCacheKeyPublic($prefix, array $params)
+        {
+            return $this->buildCacheKey($prefix, $params);
         }
 
         private function computeHalfDayTtl()
@@ -268,6 +278,11 @@ if (!class_exists('AccesFFTTApi')) {
             }
             $ttl = max(60, $next - $now);
             return $ttl;
+        }
+
+        public function computeHalfDayTtlPublic()
+        {
+            return $this->computeHalfDayTtl();
         }
 
         public function getCacheUpdatedAt($prefix, array $params)
@@ -316,6 +331,21 @@ if (!class_exists('AccesFFTTApi')) {
             $keyRencontres = $this->buildCacheKey('poule_rencontres', array('D1' => $division, 'cx_poule' => $poule));
             delete_transient($keyRencontres);
             delete_transient($keyRencontres . '__updated_at');
+        }
+
+        /**
+         * Supprime le cache des joueurs d'un club
+         * @param string $club Numéro du club
+         */
+        public function clearJoueursCache($club)
+        {
+            if (!function_exists('delete_transient')) {
+                return;
+            }
+
+            $key = $this->buildCacheKey('joueurs_club', array('numclu' => $club));
+            delete_transient($key);
+            delete_transient($key . '__updated_at');
         }
 
         public function getData($url, $params = array(), $generateHash = true)

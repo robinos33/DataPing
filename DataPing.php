@@ -178,7 +178,10 @@ class DataPing
         $atts = shortcode_atts(array('type' => 'MF'), (array) $atts, 'joueurs');
         if (in_array($atts['type'], $this->getTypeListeJoueurs(), true)) {
             $listeJoueurs = array();
-            $joueurs = new Joueurs($atts['type']);
+            $joueurs = new Joueurs();
+            $api = AccesFFTTApi::getInstance();
+            $numClub = ParametresDataPing::getNumClub();
+            $updatedAt = $api->getCacheUpdatedAt('joueurs_club', array('numclu' => $numClub));
             ob_start();
             require __DIR__ . '/views/front/joueurs.php';
             return ob_get_clean();
@@ -282,6 +285,11 @@ class DataPing
         try {
             $numClub = ParametresDataPing::getNumClub();
             $syncResults = array();
+
+            // Synchronisation des joueurs
+            $api->clearJoueursCache($numClub);
+            $joueurs = new Joueurs();
+            $syncResults['joueurs'] = count($joueurs->getJoueurs('MF'));
 
             // Synchronisation des équipes
             $api->clearEquipesCache($numClub);

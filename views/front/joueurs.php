@@ -1,5 +1,10 @@
 <?php require_once(__DIR__ . '/header.php'); ?>
 <div class="DataPing_div">
+    <?php if ($updatedAt !== false): ?>
+        <p style="font-size: 0.9em; color: #666; margin-bottom: 10px;">
+            <em>Dernière mise à jour : <?php echo date('d/m/Y à H:i:s', $updatedAt); ?></em>
+        </p>
+    <?php endif; ?>
     <table class="listeJoueurs sortableTable">
         <thead>
         <th width="135">Nom</th>

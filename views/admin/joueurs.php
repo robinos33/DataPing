@@ -32,6 +32,14 @@
     </form>
 
     <h2>Liste des joueurs</h2>
+    <?php
+    $api = AccesFFTTApi::getInstance();
+    $numClub = ParametresDataPing::getNumClub();
+    $updatedAt = $api->getCacheUpdatedAt('joueurs_club', array('numclu' => $numClub));
+    if ($updatedAt !== false):
+    ?>
+        <p><em>Dernière mise à jour du cache : <?php echo date('d/m/Y à H:i:s', $updatedAt); ?></em></p>
+    <?php endif; ?>
     <table class="wp-list-table widefat fixed striped posts">
         <thead>
         <tr>
