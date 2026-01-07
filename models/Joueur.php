@@ -74,8 +74,9 @@ if (!class_exists('joueur')) {
         }
 
         public function setClub($numClub) {
-            $club = new Club($numClub);
-            $this->club = $club;
+            // Ne pas créer d'objet Club pour éviter des appels API inutiles
+            // Tous les joueurs sont du même club, on stocke juste le numéro
+            $this->club = $numClub;
         }
 
         public function setClassement($donneesClassement) {
