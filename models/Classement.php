@@ -20,12 +20,13 @@ class Classement {
         // xml_joueur.php retourne 'point' pour les points mensuels
         $this->setPointsMensuels($datas['point'] ?? 0);
         // 'valcla' pour les points officiels
-        $this->setPointsOfficiels($datas['valcla'] ?? 0);
+        $pointsOfficiels = $datas['valcla'] ?? 0;
+        $this->setPointsOfficiels($pointsOfficiels);
         // 'progann' et 'progmois' sont calculés par getJoueur()
         $this->setProgressionAnnuelle($datas['progann'] ?? 0);
         $this->setProgressionMensuelle($datas['progmois'] ?? 0);
-        // 'clast' pour le classement officiel
-        $this->setClassementOfficiel($datas['clast'] ?? '');
+        // Calcul du classement officiel à partir des points officiels
+        $this->setClassementOfficiel($this->calculerClassementFromPoints($pointsOfficiels));
         // 'rangreg' pour le rang national, 'rangdep' pour départemental
         $this->setRangNational($datas['rangreg'] ?? '');
         $this->setRangDepartemental($datas['rangdep'] ?? '');
@@ -85,6 +86,31 @@ class Classement {
 
     public function setRangDepartemental($rangDepartemental) {
         $this->rangDepartemental = $rangDepartemental;
+    }
+
+    /**
+     * Calcule le classement à partir des points officiels
+     * - 4 chiffres : prendre les 2 premiers (ex: 1232 => 12)
+     * - 3 chiffres : prendre le 1er chiffre (ex: 879 => 8)
+     */
+    private function calculerClassementFromPoints($points) {
+        if (empty($points)) {
+            return '';
+        }
+
+        $pointsStr = (string) intval($points);
+        $nbChiffres = strlen($pointsStr);
+
+        if ($nbChiffres >= 4) {
+            // 4 chiffres ou plus : prendre les 2 premiers
+            return intval(substr($pointsStr, 0, 2));
+        } elseif ($nbChiffres === 3) {
+            // 3 chiffres : prendre le premier
+            return intval(substr($pointsStr, 0, 1));
+        } else {
+            // Moins de 3 chiffres : retourner tel quel
+            return intval($points);
+        }
     }
 
 }
