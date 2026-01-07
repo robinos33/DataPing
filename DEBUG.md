@@ -62,6 +62,7 @@ tail -f wp-content/debug.log | grep "DataPing"
 **Types d'erreurs possibles :**
 - `DataPing - Erreur cURL` : problème de connexion réseau
 - `DataPing - Code HTTP XXX` : l'API FFTT a retourné une erreur
+- `DataPing - RÉPONSE VIDE de l'API FFTT` : **l'API retourne du vide (identifiants probablement invalides)**
 - `DataPing - Erreur parsing XML` : la réponse de l'API est invalide (sauf pour xml_initialisation.php qui est ignorée)
 
 ### 5. Cas d'erreur courants
@@ -70,13 +71,13 @@ tail -f wp-content/debug.log | grep "DataPing"
 |--------|-------|----------|
 | `Numéro de club non configuré` | Paramètre manquant | Remplir le numéro de club dans l'admin |
 | `Identifiants API FFTT non configurés` | ID/Mot de passe vide | Demander les identifiants à la FFTT |
+| `RÉPONSE VIDE de l'API FFTT` | **Identifiants API invalides** | **Vérifier l'ID application et le mot de passe** auprès de la FFTT |
 | `Aucune donnée récupérée` | Identifiants invalides ou club inexistant | Vérifier les identifiants API et le numéro de club |
 | `0 joueurs récupérés` | Club inexistant ou API non configurée | Vérifier le numéro de club |
 | `Erreur cURL (6): Could not resolve host` | Problème réseau | Vérifier la connexion internet du serveur |
 | `Code HTTP 401` | Identifiants invalides | Vérifier l'ID et le mot de passe API |
 | `Code HTTP 500` | Erreur serveur FFTT | Réessayer plus tard |
 | `Erreur parsing XML - xml_initialisation.php` | L'API retourne une réponse vide | **Normal** - Cette erreur est désormais ignorée automatiquement |
-| `Erreur parsing XML - xml_equipe.php` | L'API retourne une réponse vide | Identifiants API invalides ou numéro de club incorrect |
 
 ## Flux de synchronisation
 

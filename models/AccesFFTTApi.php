@@ -403,6 +403,16 @@ if (!class_exists('AccesFFTTApi')) {
                 if (!$silentErrors) {
                     error_log("DataPing - Code HTTP $httpCode - URL: $url");
                 }
+                return false;
+            }
+
+            // Vérifier que la réponse n'est pas vide
+            if (empty($data)) {
+                if (!$silentErrors) {
+                    error_log("DataPing - RÉPONSE VIDE de l'API FFTT - URL: $url");
+                    error_log("DataPing - DIAGNOSTIC: Vérifiez vos identifiants API (l'ID '$this->appId' et le mot de passe sont-ils corrects ?)");
+                }
+                return false;
             }
 
             $xml = simplexml_load_string($data);
