@@ -20,11 +20,11 @@ if (!class_exists('joueur')) {
          */
         public function __construct($donneesLicence, $donneesClassement) {
             $this->setClassement($donneesClassement);
-            $this->setClub($donneesLicence['numclub']);
-            $this->setNom($donneesLicence['nom']);
-            $this->setPrenom($donneesLicence['prenom']);
-            $this->setSexe($donneesLicence['sexe']);
-            $this->setLicence($donneesLicence['numclub']);
+            $this->setClub($donneesLicence['club'] ?? '');
+            $this->setNom($donneesLicence['nom'] ?? '');
+            $this->setPrenom($donneesLicence['prenom'] ?? '');
+            $this->setSexe($donneesLicence['sexe'] ?? '');
+            $this->setLicence($donneesLicence['licence'] ?? '');
             $this->setCategorie($donneesClassement['cat'] ?? '');
             $this->setEtranger($donneesClassement['natio'] ?? 'F');
         }

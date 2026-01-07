@@ -13,6 +13,8 @@ class Classement {
     private $progressionAnnuelle;
     private $progressionMensuelle;
     private $classementOfficiel;
+    private $rangNational;
+    private $rangDepartemental;
 
     public function __construct($datas) {
         $this->setPointsMensuels($datas['point'] ?? 0);
@@ -20,6 +22,8 @@ class Classement {
         $this->setProgressionAnnuelle($datas['progann'] ?? 0);
         $this->setProgressionMensuelle($datas['progmois'] ?? 0);
         $this->setClassementOfficiel($datas['clast'] ?? '');
+        $this->setRangNational($datas['rangreg'] ?? '');
+        $this->setRangDepartemental($datas['rangdep'] ?? '');
     }
 
     public function getPointsMensuels() {
@@ -60,6 +64,22 @@ class Classement {
 
     public function setClassementOfficiel($classementOfficiel) {
         $this->classementOfficiel = $classementOfficiel;
+    }
+
+    public function getRangNational() {
+        return $this->rangNational;
+    }
+
+    public function setRangNational($rangNational) {
+        $this->rangNational = $rangNational;
+    }
+
+    public function getRangDepartemental() {
+        return $this->rangDepartemental;
+    }
+
+    public function setRangDepartemental($rangDepartemental) {
+        $this->rangDepartemental = $rangDepartemental;
     }
 
 }
