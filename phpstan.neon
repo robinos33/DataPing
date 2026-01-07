@@ -1,0 +1,27 @@
+parameters:
+    level: 9
+    paths:
+        - src
+        - tests
+
+    # Configuration stricte pour DDD
+    checkMissingIterableValueType: true
+    checkGenericClassInNonGenericObjectType: true
+    reportUnmatchedIgnoredErrors: true
+
+    # Règles strictes
+    strictRules:
+        allRules: true
+
+    # Exceptions WordPress
+    bootstrapFiles:
+        - wordpress-stubs.php
+
+    # Ignorer les warnings WordPress si nécessaire
+    ignoreErrors:
+        # Ajouter ici les erreurs WordPress à ignorer
+
+    # Type coverage
+    checkMissingCallableSignature: true
+    checkUninitializedProperties: true
+    checkTooWideReturnTypesInProtectedAndPublicMethods: true

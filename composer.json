@@ -1,0 +1,44 @@
+{
+  "name": "dataping/dataping",
+  "description": "Plugin WordPress pour afficher les données de la FFTT avec architecture DDD",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "require": {
+    "php": ">=8.2"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^11.0",
+    "phpstan/phpstan": "^1.10",
+    "squizlabs/php_codesniffer": "^3.8",
+    "phpstan/phpstan-strict-rules": "^1.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "DataPing\\Domain\\": "src/Domain/",
+      "DataPing\\Application\\": "src/Application/",
+      "DataPing\\Infrastructure\\": "src/Infrastructure/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "DataPing\\Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "test": "phpunit --colors=always",
+    "test:coverage": "phpunit --coverage-html coverage --coverage-text",
+    "test:watch": "phpunit --watch",
+    "analyse": "phpstan analyse src tests --level=9",
+    "cs:check": "phpcs --standard=PSR12 src tests",
+    "cs:fix": "phpcbf --standard=PSR12 src tests",
+    "quality": [
+      "@test",
+      "@analyse",
+      "@cs:check"
+    ]
+  },
+  "config": {
+    "sort-packages": true,
+    "optimize-autoloader": true
+  }
+}
