@@ -162,23 +162,27 @@ if (!class_exists('AccesFFTTApi')) {
                 error_log("DataPing - getEquipesByClub($club, $type) - getData result: " . (is_array($data) ? json_encode($data) : gettype($data)));
                 $result = AccesFFTTApi::getCollection($data, 'equipe');
                 error_log("DataPing - getEquipesByClub($club, $type) - getCollection result count: " . count($result));
+
+                // Extraire iddiv et idpoule AVANT de mettre en cache
+                foreach ($result as &$team) {
+                    $params = array();
+
+                    // Vérifier si liendivision est une chaîne avant de la parser
+                    if (isset($team['liendivision']) && is_string($team['liendivision'])) {
+                        parse_str($team['liendivision'], $params);
+                        $team['idpoule'] = isset($params['cx_poule']) ? $params['cx_poule'] : null;
+                        $team['iddiv'] = isset($params['D1']) ? $params['D1'] : null;
+                        error_log("DataPing - Team: {$team['libequipe']} - liendivision: {$team['liendivision']} - iddiv: {$team['iddiv']}, idpoule: {$team['idpoule']}");
+                    } else {
+                        // Si c'est déjà un tableau ou absent, définir des valeurs par défaut
+                        $team['idpoule'] = null;
+                        $team['iddiv'] = null;
+                        error_log("DataPing - Team: {$team['libequipe']} - liendivision absent ou non-string");
+                    }
+                }
+
                 return $result;
             });
-
-            foreach ($teams as &$team) {
-                $params = array();
-
-                // Vérifier si liendivision est une chaîne avant de la parser
-                if (isset($team['liendivision']) && is_string($team['liendivision'])) {
-                    parse_str($team['liendivision'], $params);
-                    $team['idpoule'] = isset($params['cx_poule']) ? $params['cx_poule'] : null;
-                    $team['iddiv'] = isset($params['D1']) ? $params['D1'] : null;
-                } else {
-                    // Si c'est déjà un tableau ou absent, définir des valeurs par défaut
-                    $team['idpoule'] = null;
-                    $team['iddiv'] = null;
-                }
-            }
 
             return $teams;
         }

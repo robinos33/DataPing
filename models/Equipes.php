@@ -27,13 +27,36 @@ class Equipes {
 	 * @internal param array $listeEquipes
 	 */
 	private function _setEquipesFromApi( $listeEquipesM, $listeEquipesF ) {
+		// Utiliser un tableau associatif pour dédupliquer par libequipe
+		$equipesUniques = array();
+
 		foreach ( $listeEquipesM as $equipe ) {
-			$this->_equipes[] = new Equipe( $equipe, 'M' );
+			$key = $equipe['libequipe'];
+			$equipesUniques[$key] = new Equipe( $equipe, 'M' );
 		}
 
 		foreach ( $listeEquipesF as $equipe ) {
-			$this->_equipes[] = new Equipe( $equipe, 'F' );
+			$key = $equipe['libequipe'];
+			// Si l'équipe existe déjà (même nom), on ne l'ajoute pas
+			if (!isset($equipesUniques[$key])) {
+				$equipesUniques[$key] = new Equipe( $equipe, 'F' );
+			}
 		}
+
+		// Convertir en tableau indexé
+		$this->_equipes = array_values($equipesUniques);
+
+		// Trier les équipes par numéro d'équipe (extrait du libequipe)
+		usort($this->_equipes, function($a, $b) {
+			// Extraire le numéro de l'équipe depuis le libequipe (ex: "US TALENCE 15 - Phase 1")
+			preg_match('/(\d+)/', $a->getLibequipe(), $matchesA);
+			preg_match('/(\d+)/', $b->getLibequipe(), $matchesB);
+
+			$numA = isset($matchesA[1]) ? intval($matchesA[1]) : 0;
+			$numB = isset($matchesB[1]) ? intval($matchesB[1]) : 0;
+
+			return $numA - $numB;
+		});
 	}
 
 	public function getEquipes( $sexe ) {
