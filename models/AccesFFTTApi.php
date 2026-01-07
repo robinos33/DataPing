@@ -441,9 +441,17 @@ if (!class_exists('AccesFFTTApi')) {
                 return false;
             }
 
-            // L'API FFTT retourne du XML en ISO-8859-1, convertir en UTF-8
+            // L'API FFTT peut retourner du XML en ISO-8859-1 ou UTF-8
+            // Détecter l'encodage réel pour éviter la double conversion qui corrompt les accents
             if (preg_match('/encoding=["\']ISO-8859-1["\']/i', $data)) {
-                $data = mb_convert_encoding($data, 'UTF-8', 'ISO-8859-1');
+                $realEncoding = mb_detect_encoding($data, ['UTF-8', 'ISO-8859-1'], true);
+
+                if ($realEncoding === 'ISO-8859-1') {
+                    // Contenu réellement en ISO-8859-1, convertir en UTF-8
+                    $data = mb_convert_encoding($data, 'UTF-8', 'ISO-8859-1');
+                }
+
+                // Dans tous les cas, mettre à jour la déclaration XML
                 $data = preg_replace('/encoding=["\']ISO-8859-1["\']/i', 'encoding="UTF-8"', $data);
             }
 
