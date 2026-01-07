@@ -370,6 +370,8 @@ if (!class_exists('AccesFFTTApi')) {
                 $url .= '?' . http_build_query($params);
             }
 
+            // Stocker le log pour affichage dans l'interface admin
+            $this->addApiLog("Appel API: $url");
             error_log("DataPing - Appel API: $url");
 
             $curl = curl_init();
@@ -394,14 +396,18 @@ if (!class_exists('AccesFFTTApi')) {
             // Log des erreurs cURL
             if ($curlErrno !== 0) {
                 if (!$silentErrors) {
-                    error_log("DataPing - Erreur cURL ($curlErrno): $curlError - URL: $url");
+                    $msg = "Erreur cURL ($curlErrno): $curlError";
+                    $this->addApiLog($msg, 'error');
+                    error_log("DataPing - $msg - URL: $url");
                 }
                 return false;
             }
 
             if ($httpCode !== 200) {
                 if (!$silentErrors) {
-                    error_log("DataPing - Code HTTP $httpCode - URL: $url");
+                    $msg = "Code HTTP $httpCode";
+                    $this->addApiLog($msg, 'error');
+                    error_log("DataPing - $msg - URL: $url");
                 }
                 return false;
             }
@@ -409,8 +415,9 @@ if (!class_exists('AccesFFTTApi')) {
             // Vérifier que la réponse n'est pas vide
             if (empty($data)) {
                 if (!$silentErrors) {
-                    error_log("DataPing - RÉPONSE VIDE de l'API FFTT - URL: $url");
-                    error_log("DataPing - DIAGNOSTIC: Vérifiez vos identifiants API (l'ID '$this->appId' et le mot de passe sont-ils corrects ?)");
+                    $msg = "RÉPONSE VIDE de l'API FFTT - Vérifiez vos identifiants (ID: '$this->appId')";
+                    $this->addApiLog($msg, 'error');
+                    error_log("DataPing - $msg - URL: $url");
                 }
                 return false;
             }
@@ -419,10 +426,14 @@ if (!class_exists('AccesFFTTApi')) {
 
             if (!$xml) {
                 if (!$silentErrors) {
-                    error_log("DataPing - Erreur parsing XML - URL: $url - Data: " . substr($data, 0, 500));
+                    $msg = "Erreur parsing XML - Data: " . substr($data, 0, 200);
+                    $this->addApiLog($msg, 'error');
+                    error_log("DataPing - $msg - URL: $url");
                 }
                 return false;
             }
+
+            $this->addApiLog("Réponse OK (HTTP 200)", 'success');
 
             // Petite astuce pour transformer simplement le XML en tableau
             return json_decode(json_encode($xml), true);
@@ -451,6 +462,43 @@ if (!class_exists('AccesFFTTApi')) {
             } else {
                 return empty($data) ? null : $data;
             }
+        }
+
+        /**
+         * Ajoute un log d'API pour affichage dans l'interface admin
+         */
+        private function addApiLog($message, $type = 'info')
+        {
+            $logs = get_option('dataping_api_logs', array());
+
+            // Ne garder que les 50 derniers logs
+            if (count($logs) >= 50) {
+                $logs = array_slice($logs, -49);
+            }
+
+            $logs[] = array(
+                'time' => current_time('mysql'),
+                'type' => $type,
+                'message' => $message
+            );
+
+            update_option('dataping_api_logs', $logs);
+        }
+
+        /**
+         * Récupère les logs d'API
+         */
+        public static function getApiLogs()
+        {
+            return get_option('dataping_api_logs', array());
+        }
+
+        /**
+         * Efface les logs d'API
+         */
+        public static function clearApiLogs()
+        {
+            delete_option('dataping_api_logs');
         }
 
         public static function generateSerial()

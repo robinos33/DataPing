@@ -38,6 +38,58 @@ if (isset($_GET['settings-updated']) && $_GET['settings-updated']) {
     <h2>Paramètres de l'API FFTT</h2>
     <?php $this->getForm(); ?>
 
+    <h2>Logs de l'API FFTT</h2>
+    <div style="background: #fff; border: 1px solid #ccd0d4; padding: 15px; margin-bottom: 20px;">
+        <?php
+        $logs = AccesFFTTApi::getApiLogs();
+        if (empty($logs)) {
+            echo '<p><em>Aucun log disponible. Lancez une synchronisation pour voir les logs.</em></p>';
+        } else {
+            echo '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">';
+            echo '<p style="margin: 0;"><strong>' . count($logs) . ' logs d\'API</strong></p>';
+            echo '<form method="post" style="margin: 0;">';
+            echo '<input type="hidden" name="dataping_clear_logs" value="1">';
+            wp_nonce_field('dataping_clear_logs', 'dataping_clear_logs_nonce');
+            echo '<button type="submit" class="button">Effacer les logs</button>';
+            echo '</form>';
+            echo '</div>';
+
+            echo '<div style="max-height: 400px; overflow-y: auto; font-family: monospace; font-size: 12px; background: #f8f8f8; padding: 10px; border: 1px solid #ddd;">';
+
+            // Afficher les logs en ordre inverse (plus récent d'abord)
+            foreach (array_reverse($logs) as $log) {
+                $color = '#333';
+                $icon = '●';
+                if ($log['type'] === 'error') {
+                    $color = '#dc3232';
+                    $icon = '✖';
+                } elseif ($log['type'] === 'success') {
+                    $color = '#46b450';
+                    $icon = '✓';
+                }
+
+                echo '<div style="margin-bottom: 5px; padding: 5px; border-left: 3px solid ' . esc_attr($color) . '; background: #fff;">';
+                echo '<span style="color: #666;">[' . esc_html($log['time']) . ']</span> ';
+                echo '<span style="color: ' . esc_attr($color) . '; font-weight: bold;">' . $icon . '</span> ';
+                echo '<span>' . esc_html($log['message']) . '</span>';
+                echo '</div>';
+            }
+
+            echo '</div>';
+        }
+
+        // Gestion de l'effacement des logs
+        if (isset($_POST['dataping_clear_logs']) && check_admin_referer('dataping_clear_logs', 'dataping_clear_logs_nonce')) {
+            AccesFFTTApi::clearApiLogs();
+            echo '<script>window.location.href = window.location.href.split("?")[0] + "?page=parametres_DataPing&logs_cleared=1";</script>';
+        }
+
+        if (isset($_GET['logs_cleared'])) {
+            echo '<div class="notice notice-success" style="margin-top: 10px;"><p>Logs effacés avec succès.</p></div>';
+        }
+        ?>
+    </div>
+
     <h2>Aide et diagnostic</h2>
     <div class="notice notice-info">
         <p><strong>En cas d'erreur lors de la synchronisation :</strong></p>
@@ -45,10 +97,11 @@ if (isset($_GET['settings-updated']) && $_GET['settings-updated']) {
             <li>Vérifiez que tous les paramètres ci-dessus sont correctement renseignés</li>
             <li>Assurez-vous que le numéro de club est correct (format: 8 chiffres, ex: 10330011)</li>
             <li>Vérifiez que vos identifiants API sont valides (obtenus auprès de la FFTT)</li>
-            <li>Consultez les logs d'erreur dans <code>wp-content/debug.log</code> pour plus de détails</li>
+            <li><strong>Consultez les "Logs de l'API FFTT" ci-dessus pour voir les détails des appels API</strong></li>
         </ol>
         <p><strong>Erreurs fréquentes :</strong></p>
         <ul>
+            <li><em>RÉPONSE VIDE de l'API FFTT</em> : <strong>Identifiants API invalides</strong> - Vérifiez votre ID et mot de passe</li>
             <li><em>Aucune donnée récupérée</em> : Identifiants API invalides ou numéro de club incorrect</li>
             <li><em>Erreur parsing XML</em> : L'API FFTT a retourné une réponse vide (vérifiez que le club existe)</li>
             <li><em>Erreur cURL</em> : Problème de connexion réseau du serveur</li>
