@@ -380,18 +380,26 @@ if (!class_exists('AccesFFTTApi')) {
                 curl_setopt($curl, CURLOPT_INTERFACE, $this->getIpSource());
             }
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_ENCODING, ''); // Gère automatiquement gzip/deflate
+            curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true); // Suit les redirections
+            curl_setopt($curl, CURLOPT_MAXREDIRS, 5);
+            curl_setopt($curl, CURLOPT_TIMEOUT, 30);
             curl_setopt($curl, CURLOPT_HTTPHEADER, array(
-                "Accept:", // Suprime le header par default de cUrl (Accept: */*)
-                "User-agent: Mozilla/4.0 (compatible; MSIE 6.0; Win32)",
-                "Content-Type: application/x-www-form-urlencoded",
-                "Accept-Encoding: gzip",
-                "Connection: Keep-Alive",
+                "User-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                "Accept: text/xml,application/xml,*/*",
             ));
             $data = curl_exec($curl);
             $curlError = curl_error($curl);
             $curlErrno = curl_errno($curl);
             $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+            $contentType = curl_getinfo($curl, CURLINFO_CONTENT_TYPE);
+            $dataLength = strlen($data);
             curl_close($curl);
+
+            // Log de diagnostic
+            if (!$silentErrors) {
+                $this->addApiLog("HTTP $httpCode | Type: $contentType | Taille: $dataLength octets", $httpCode === 200 ? 'info' : 'error');
+            }
 
             // Log des erreurs cURL
             if ($curlErrno !== 0) {
