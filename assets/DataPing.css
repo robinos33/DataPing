@@ -90,11 +90,20 @@
 .DataPing_div .listeJoueurs th{
    font-size: 13px;
    text-align: center;
-   vertical-align: middle; 
+   vertical-align: middle;
 }
 
 .DataPing_div .listeJoueurs td{
     font-size:11px;
+}
+
+/* Couleurs par sexe pour les joueurs */
+.DataPing_div .listeJoueurs tr.F td{
+    color: #e74c3c;
+}
+
+.DataPing_div .listeJoueurs tr.M td{
+    color: #3498db;
 }
 
 span.rouge {
@@ -146,11 +155,11 @@ th.headerSortUp {
 }
 
 .dataping_page_joueurs_DataPing tr.F td{
-    color: #faafaa;
+    color: #e74c3c;
 }
 
 .dataping_page_joueurs_DataPing tr.M td{
-    color: #0063ff;
+    color: #3498db;
 }
 
 /* Synchronisation */

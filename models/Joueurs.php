@@ -27,16 +27,20 @@ if (!class_exists('joueurs')) {
             $lifeTime = $this->_api->computeHalfDayTtlPublic();
 
             $joueursData = $this->_api->getCachedDataPublic($cacheKey, $lifeTime, function() use ($club) {
-                // xml_liste_joueur.php retourne déjà toutes les données nécessaires
+                // xml_liste_joueur.php retourne la liste basique, il faut enrichir avec xml_joueur.php
                 $licencies = $this->_api->getLicencesByClub($club);
                 $joueursData = array();
 
-                foreach ($licencies as $joueur) {
-                    // Les données de licence et classement sont déjà dans $joueur
-                    $joueursData[] = array(
-                        'licence' => $joueur,  // Contient déjà toutes les infos de licence
-                        'classement' => $joueur // Contient déjà les infos de classement
-                    );
+                foreach ($licencies as $licencie) {
+                    // Récupérer les données complètes du joueur (classement, points, rangs, etc.)
+                    $joueurComplet = $this->_api->getJoueur($licencie['licence']);
+
+                    if ($joueurComplet) {
+                        $joueursData[] = array(
+                            'licence' => $joueurComplet,
+                            'classement' => $joueurComplet
+                        );
+                    }
                 }
 
                 return $joueursData;

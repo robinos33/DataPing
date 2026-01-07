@@ -27,6 +27,8 @@
                     } else {
                         $class = 'even';
                     }
+                    // Ajouter la classe du sexe pour la couleur
+                    $class .= ' ' . $joueur->getSexe();
                     ?>
                     <tr class="<?php echo $class ?>">
                         <td><?php echo $joueur->getNom(); ?></td>

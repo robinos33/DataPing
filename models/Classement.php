@@ -17,15 +17,17 @@ class Classement {
     private $rangDepartemental;
 
     public function __construct($datas) {
-        // xml_liste_joueur.php utilise 'points' au lieu de 'point'
-        $this->setPointsMensuels($datas['point'] ?? $datas['points'] ?? 0);
-        $this->setPointsOfficiels($datas['valcla'] ?? $datas['points'] ?? 0);
+        // xml_joueur.php retourne 'point' pour les points mensuels
+        $this->setPointsMensuels($datas['point'] ?? 0);
+        // 'valcla' pour les points officiels
+        $this->setPointsOfficiels($datas['valcla'] ?? 0);
+        // 'progann' et 'progmois' sont calculés par getJoueur()
         $this->setProgressionAnnuelle($datas['progann'] ?? 0);
         $this->setProgressionMensuelle($datas['progmois'] ?? 0);
-        // xml_liste_joueur.php utilise 'echelon' au lieu de 'clast'
-        $this->setClassementOfficiel($datas['clast'] ?? $datas['echelon'] ?? '');
-        // xml_liste_joueur.php utilise 'place' pour le rang
-        $this->setRangNational($datas['rangreg'] ?? $datas['place'] ?? '');
+        // 'clast' pour le classement officiel
+        $this->setClassementOfficiel($datas['clast'] ?? '');
+        // 'rangreg' pour le rang national, 'rangdep' pour départemental
+        $this->setRangNational($datas['rangreg'] ?? '');
         $this->setRangDepartemental($datas['rangdep'] ?? '');
     }
 
