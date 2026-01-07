@@ -441,6 +441,12 @@ if (!class_exists('AccesFFTTApi')) {
                 return false;
             }
 
+            // L'API FFTT retourne du XML en ISO-8859-1, convertir en UTF-8
+            if (preg_match('/encoding=["\']ISO-8859-1["\']/i', $data)) {
+                $data = mb_convert_encoding($data, 'UTF-8', 'ISO-8859-1');
+                $data = preg_replace('/encoding=["\']ISO-8859-1["\']/i', 'encoding="UTF-8"', $data);
+            }
+
             $xml = simplexml_load_string($data);
 
             if (!$xml) {
@@ -455,7 +461,7 @@ if (!class_exists('AccesFFTTApi')) {
             $this->addApiLog("Réponse OK (HTTP 200)", 'success');
 
             // Petite astuce pour transformer simplement le XML en tableau
-            return json_decode(json_encode($xml), true);
+            return json_decode(json_encode($xml, JSON_UNESCAPED_UNICODE), true);
         }
 
         public static function getCollection($data, $key = null)
