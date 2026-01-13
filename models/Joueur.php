@@ -96,8 +96,8 @@ if (!class_exists('joueur')) {
         }
 
         public function setEtranger($natio) {
-            // Si natio != 'F', c'est un joueur étranger
-            $this->etranger = ($natio !== 'F');
+            // Si natio == 'E', c'est un joueur étranger
+            $this->etranger = ($natio === 'E');
         }
 
         public function isEtranger() {
