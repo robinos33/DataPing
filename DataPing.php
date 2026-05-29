@@ -608,6 +608,11 @@ class DataPing
         .dataping-dashboard-widget .spinner {
             visibility: visible;
         }
+        /* Neutralise le line-height:1.9 imposé par WP sur .button .dashicons */
+        #dataping-dashboard-sync-button .dashicons {
+            line-height: 1 !important;
+            vertical-align: middle !important;
+        }
         </style>
         <?php
     }
