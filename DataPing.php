@@ -68,10 +68,12 @@ class DataPing
     public function dataping_style_scripts()
     {
         // Styles
-        wp_register_style('admin-css', plugins_url('/assets/DataPing.css', __FILE__), array(), '1.0');
+        $cssVer = filemtime(plugin_dir_path(__FILE__) . 'assets/DataPing.css');
+        $jsVer  = filemtime(plugin_dir_path(__FILE__) . 'assets/DataPing.js');
+        wp_register_style('admin-css', plugins_url('/assets/DataPing.css', __FILE__), array(), $cssVer);
         wp_enqueue_style('admin-css');
         // Javascript
-        wp_register_script('dataping-js', plugins_url('/assets/DataPing.js', __FILE__), array('jquery'), '1.0', true);
+        wp_register_script('dataping-js', plugins_url('/assets/DataPing.js', __FILE__), array('jquery'), $jsVer, true);
         wp_register_script('table-sorter', plugins_url('/assets/tablesorter/jquery.tablesorter.min.js', __FILE__), array('jquery'), '1.0', true);
         wp_register_script('table-sorter-pager', plugins_url('/assets/tablesorter/jquery.tablesorter.pager.js', __FILE__), array('jquery', 'table-sorter'), '1.0', true);
         wp_enqueue_script('dataping-js');
