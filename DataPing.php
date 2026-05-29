@@ -542,7 +542,7 @@ class DataPing
 
             <p>
                 <button id="dataping-dashboard-sync-button" class="button button-primary button-large" style="width:100%; display:inline-flex; align-items:center; justify-content:center; gap:6px; line-height:1;">
-                    <span class="dashicons dashicons-update"></span>
+                    <span class="dashicons dashicons-update" style="line-height:1;"></span>
                     Synchroniser les données
                 </button>
             </p>
