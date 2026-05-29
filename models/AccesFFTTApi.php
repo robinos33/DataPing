@@ -265,6 +265,28 @@ if (!class_exists('AccesFFTTApi')) {
             return AccesFFTTApi::getCollection($data, 'licence');
         }
 
+        /**
+         * Retourne le détail d'une rencontre (feuille de match) :
+         * composition des équipes et résultats partie par partie.
+         * Cache longue durée (1 semaine) car les résultats passés ne changent pas.
+         *
+         * @param string $rencId   Identifiant de la rencontre (champ renc_id du lien)
+         * @param int    $isRetour Match retour (0 = aller, 1 = retour)
+         * @return array|false
+         */
+        public function getRencontreDetail($rencId, $isRetour = 0)
+        {
+            $key      = $this->buildCacheKeyPublic('renc_detail', array('renc_id' => $rencId, 'is_retour' => $isRetour));
+            $lifeTime = 7 * DAY_IN_SECONDS;
+
+            return $this->getCachedDataPublic($key, $lifeTime, function () use ($rencId, $isRetour) {
+                return $this->getData('https://www.fftt.com/mobile/pxml/xml_chp_renc.php', array(
+                    'renc_id'   => $rencId,
+                    'is_retour' => $isRetour,
+                ));
+            });
+        }
+
         private function getCachedData($key, $lifeTime, $callback)
         {
             // Use WordPress transients when available; otherwise, bypass cache

@@ -49,6 +49,21 @@
             $numJournee = 0;
             $journee    = '';
             foreach ($rencontresPoule as $rencontre) {
+                // Parsing du lien pour extraire renc_id et is_retour
+                $rencId   = '';
+                $isRetour = 0;
+                if (isset($rencontre['lien']) && is_string($rencontre['lien']) && !empty($rencontre['lien'])) {
+                    $lienParams = array();
+                    parse_str($rencontre['lien'], $lienParams);
+                    $rencId   = $lienParams['renc_id'] ?? '';
+                    $isRetour = (int) ($lienParams['is_retour'] ?? 0);
+                }
+
+                $scoreA    = !is_array($rencontre['scorea']) ? $rencontre['scorea'] : '';
+                $scoreB    = !is_array($rencontre['scoreb']) ? $rencontre['scoreb'] : '';
+                $hasScore  = $scoreA !== '' && $scoreB !== '';
+                $hasDetail = $hasScore && !empty($rencId);
+
                 if ($journee !== $rencontre['libelle']) {
                     if ($numJournee !== 0) {
                         echo '</tbody></table>';
@@ -59,16 +74,31 @@
                     echo '<caption>' . esc_html($journee) . '</caption>';
                     echo '<tbody>';
                 }
-                $scoreA = !is_array($rencontre['scorea']) ? esc_html($rencontre['scorea']) : '';
-                $scoreB = !is_array($rencontre['scoreb']) ? esc_html($rencontre['scoreb']) : '';
                 ?>
-                <tr>
-                    <td class="equipes left"><?php echo esc_html($rencontre['equa']); ?></td>
-                    <td class="score center dataping-score"><?php echo $scoreA; ?></td>
+                <tr class="dataping-rencontre-row<?php echo $hasDetail ? ' dataping-expandable' : ''; ?>"
+                    <?php if ($hasDetail): ?>
+                        data-renc-id="<?php echo esc_attr($rencId); ?>"
+                        data-is-retour="<?php echo esc_attr($isRetour); ?>"
+                        title="Cliquer pour voir la feuille de match"
+                    <?php endif; ?>>
+                    <td class="equipes left">
+                        <?php if ($hasDetail): ?>
+                            <span class="dataping-expand-icon" aria-hidden="true">▶</span>
+                        <?php endif; ?>
+                        <?php echo esc_html($rencontre['equa']); ?>
+                    </td>
+                    <td class="score center dataping-score"><?php echo esc_html($scoreA); ?></td>
                     <td class="tiret center dataping-tiret"> - </td>
-                    <td class="score center dataping-score"><?php echo $scoreB; ?></td>
+                    <td class="score center dataping-score"><?php echo esc_html($scoreB); ?></td>
                     <td class="equipes right"><?php echo esc_html($rencontre['equb']); ?></td>
                 </tr>
+                <?php if ($hasDetail): ?>
+                <tr class="dataping-feuille-row">
+                    <td colspan="5">
+                        <div class="dataping-feuille-content"></div>
+                    </td>
+                </tr>
+                <?php endif; ?>
                 <?php
             }
             if ($numJournee > 0) {

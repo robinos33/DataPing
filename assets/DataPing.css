@@ -198,6 +198,124 @@
     color: #999;
 }
 
+/* ===== Feuilles de match ===== */
+
+/* Ligne rencontre cliquable */
+.DataPing_div .dataping-expandable {
+    cursor: pointer;
+}
+
+.DataPing_div .dataping-expandable:hover td {
+    background-color: #ddeeff !important;
+}
+
+/* Icône d'expansion */
+.DataPing_div .dataping-expand-icon {
+    display: inline-block;
+    margin-right: 5px;
+    font-size: 9px;
+    color: #999;
+    transition: transform 0.15s ease;
+    user-select: none;
+}
+
+/* Ligne de détail (cachée par défaut) */
+.DataPing_div .dataping-feuille-row {
+    display: none;
+}
+
+.DataPing_div .dataping-feuille-row > td {
+    padding: 0;
+    border-top: none;
+}
+
+/* Contenu de la feuille de match */
+.DataPing_div .dataping-feuille {
+    padding: 14px 16px;
+    background: #f9fbfd;
+    border-top: 2px solid #2c3e50;
+}
+
+/* Score global */
+.DataPing_div .dataping-feuille-resultat {
+    text-align: center;
+    font-size: 14px;
+    margin-bottom: 14px;
+    padding: 8px;
+    background: #fff;
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+}
+
+.DataPing_div .dataping-feuille-equipe {
+    font-size: 13px;
+    color: #444;
+}
+
+.DataPing_div .dataping-feuille-score {
+    font-size: 18px;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 0 10px;
+}
+
+/* Titre de section interne */
+.DataPing_div .dataping-feuille-section {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #888;
+    margin: 10px 0 4px;
+    font-weight: 600;
+}
+
+/* Tables internes (composition + parties) — héritent de dataping-table */
+.DataPing_div .dataping-feuille-compo,
+.DataPing_div .dataping-feuille-parties {
+    font-size: 12px;
+    margin-bottom: 10px;
+}
+
+.DataPing_div .dataping-feuille-compo th,
+.DataPing_div .dataping-feuille-parties th {
+    font-size: 10px;
+    padding: 7px 10px;
+}
+
+.DataPing_div .dataping-feuille-compo td,
+.DataPing_div .dataping-feuille-parties td {
+    font-size: 12px;
+    padding: 6px 10px;
+}
+
+/* Joueur / équipe gagnant·e */
+.DataPing_div .dataping-winner {
+    font-weight: 700;
+    color: #1a5276;
+}
+
+/* Détail des sets */
+.DataPing_div .dataping-sets {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: #666;
+    white-space: nowrap;
+}
+
+/* Indicateurs de chargement / erreur */
+.DataPing_div .dataping-feuille-loading,
+.DataPing_div .dataping-feuille-error {
+    margin: 8px 0;
+    font-size: 12px;
+    font-style: italic;
+    color: #888;
+    padding: 6px 12px;
+}
+
+.DataPing_div .dataping-feuille-error {
+    color: #c0392b;
+}
+
 /* ===== Horodatage ===== */
 .dataping-updated-at {
     font-size: 12px;

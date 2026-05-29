@@ -39,6 +39,8 @@ class DataPing
         // AJAX handlers
         add_action('wp_ajax_dataping_sync', array($this, 'handle_ajax_sync'));
         add_action('wp_ajax_dataping_generate_pages', array($this, 'handle_ajax_generate_pages'));
+        add_action('wp_ajax_dataping_feuille_match',        array($this, 'handle_ajax_feuille_match'));
+        add_action('wp_ajax_nopriv_dataping_feuille_match', array($this, 'handle_ajax_feuille_match'));
 
         // Widget dashboard
         add_action('wp_dashboard_setup', array($this, 'add_dashboard_widget'));
@@ -79,6 +81,9 @@ class DataPing
         wp_enqueue_script('dataping-js');
         wp_enqueue_script('table-sorter');
         wp_enqueue_script('table-sorter-pager');
+        wp_localize_script('dataping-js', 'DataPingAjax', array(
+            'ajaxurl' => admin_url('admin-ajax.php'),
+        ));
     }
 
     public function register_settings()
@@ -265,6 +270,31 @@ class DataPing
             return array();
         }
         return $api->getPouleRencontres($params['division'], $params['poule']);
+    }
+
+    /**
+     * Handler AJAX public : retourne le détail d'une rencontre (feuille de match).
+     * Accessible aux visiteurs non connectés (wp_ajax_nopriv).
+     */
+    public function handle_ajax_feuille_match()
+    {
+        $rencId   = sanitize_text_field($_POST['renc_id']   ?? '');
+        $isRetour = (int) ($_POST['is_retour'] ?? 0);
+
+        if (empty($rencId)) {
+            wp_send_json_error(array('message' => 'ID de rencontre manquant'));
+            return;
+        }
+
+        $api  = AccesFFTTApi::getInstance();
+        $data = $api->getRencontreDetail($rencId, $isRetour);
+
+        if (!$data) {
+            wp_send_json_error(array('message' => 'Feuille de match non disponible'));
+            return;
+        }
+
+        wp_send_json_success($data);
     }
 
     /**
