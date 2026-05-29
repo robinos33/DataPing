@@ -12,8 +12,8 @@ $nonce        = wp_create_nonce('dataping_generate_pages_nonce');
     <div style="margin-bottom: 12px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
         <button type="button" id="dataping-select-all" class="button">Tout sélectionner</button>
         <button type="button" id="dataping-deselect-all" class="button">Tout désélectionner</button>
-        <button type="button" id="dataping-generate-btn" class="button button-primary button-large">
-            <span class="dashicons dashicons-yes-alt" style="vertical-align: middle;"></span>
+        <button type="button" id="dataping-generate-btn" class="button button-primary button-large" style="display:inline-flex; align-items:center; gap:6px;">
+            <span class="dashicons dashicons-yes-alt" style="width:18px; height:18px; font-size:18px;"></span>
             Appliquer la sélection
         </button>
         <span id="dataping-generate-spinner" class="spinner" style="float:none; margin:0;"></span>
