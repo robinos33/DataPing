@@ -5,7 +5,7 @@
         if ($atts['iddiv'] === $equipe['iddiv'] && $atts['idpoule'] === $equipe['idpoule']) {
             $classementPoule = $api->getPouleClassement($equipe['iddiv'], $equipe['idpoule']);
             ?>
-            <h4><?php echo $equipe['libdivision'] . ' - ' . $equipe['libequipe']; ?></h4>
+            <h4><?php echo esc_html($equipe['libdivision']) . ' - ' . esc_html($equipe['libequipe']); ?></h4>
             <h5>Classement</h5>
             <table>
                 <thead>
@@ -19,7 +19,7 @@
                 foreach ($classementPoule as $classement) {
                     //Affichage différent pour l'équipe du club
                     $classEquipe = '';
-                    if (preg_match('/' . $classement['equipe'] . '/', $equipe['libequipe'])) {
+                    if (preg_match('/' . preg_quote($classement['equipe'], '/') . '/', $equipe['libequipe'])) {
                         $classEquipe = 'equipe_club';
                     }
 
@@ -32,11 +32,11 @@
                     }
                     ?>
 
-                    <tr class="<?php echo $classEquipe . ' ' . $class; ?>">
-                        <td class="center"><?php echo $classement['clt']; ?></td>
-                        <td><?php echo $classement['equipe']; ?></td>
-                        <td class="center"><?php echo $classement['joue']; ?></td>
-                        <td class="center"><?php echo $classement['pts']; ?></td>
+                    <tr class="<?php echo esc_attr($classEquipe . ' ' . $class); ?>">
+                        <td class="center"><?php echo esc_html($classement['clt']); ?></td>
+                        <td><?php echo esc_html($classement['equipe']); ?></td>
+                        <td class="center"><?php echo esc_html($classement['joue']); ?></td>
+                        <td class="center"><?php echo esc_html($classement['pts']); ?></td>
                     </tr>
                 <?php } ?>
             </table>
@@ -53,30 +53,32 @@
                     $journee = $rencontre['libelle'];
                     $numJournee++;
 
-                    echo '<table class="DataPing_rencontres_table" id=\'journee' . $numJournee . '\'>';
-                    echo '<caption colspan="5" class="center">' . $journee . '</caption>';
+                    echo '<table class="DataPing_rencontres_table" id="journee' . esc_attr($numJournee) . '">';
+                    echo '<caption colspan="5" class="center">' . esc_html($journee) . '</caption>';
                 }
                 ?>
                 <tr>
-                    <td class="equipes left"><?php echo $rencontre['equa']; ?></td>
+                    <td class="equipes left"><?php echo esc_html($rencontre['equa']); ?></td>
                     <td class="score center"><?php
                         if (!is_array($rencontre['scorea'])) {
-                            echo $rencontre['scorea'];
+                            echo esc_html($rencontre['scorea']);
                         }
                         ?></td>
                     <td class="tiret center"> - </td>
                     <td class="score center"><?php
                         if (!is_array($rencontre['scoreb'])) {
-                            echo $rencontre['scoreb'];
+                            echo esc_html($rencontre['scoreb']);
                         }
                         ?></td>
-                    <td class="equipes right"><?php echo $rencontre['equb']; ?></td>
+                    <td class="equipes right"><?php echo esc_html($rencontre['equb']); ?></td>
                 </tr>
 
                 <?php
                 //echo 'numjournée : ' . $numJournee . ' rencontresPoules : ' . count($rencontre) . '<br />';
             }
-            echo '</table>';
+            if ($numJournee > 0) {
+                echo '</table>';
+            }
             // Affiche la date de dernière mise à jour (cache demi-journée)
             if (method_exists($api, 'getCacheUpdatedAt')) {
                 $u1 = $api->getCacheUpdatedAt('poule_classement', array('D1' => $equipe['iddiv'], 'cx_poule' => $equipe['idpoule']));

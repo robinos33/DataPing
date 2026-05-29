@@ -42,14 +42,14 @@ if (!class_exists('AccesFFTTApi')) {
 
                 // Démarre une session si nécessaire (certaines installations WP n'utilisent pas les sessions par défaut)
                 if (function_exists('session_status') && session_status() !== PHP_SESSION_ACTIVE && !headers_sent()) {
-                    @session_start();
+                    session_start();
                 }
 
                 if (empty($_SESSION['serial'])) {
                     $_SESSION['serial'] = AccesFFTTApi::generateSerial();
                 }
 
-                $this->setSerial($_SESSION['serial']);
+                $this->setSerial(!empty($_SESSION['serial']) ? $_SESSION['serial'] : AccesFFTTApi::generateSerial());
                 // Initialise l'application si possible (les éventuelles erreurs XML sont gérées en interne)
                 $this->initialization();
             }
@@ -60,7 +60,8 @@ if (!class_exists('AccesFFTTApi')) {
 
         public static function getInstance()
         {
-            if (is_null(self::$_instance)) {
+            if (is_null(self::$_instance)
+                || (is_null(self::$_instance->appId) && !is_null(ParametresDataPing::getIdApplication()))) {
                 self::$_instance = new AccesFFTTApi();
             }
 
@@ -213,8 +214,8 @@ if (!class_exists('AccesFFTTApi')) {
                 $params = array();
                 parse_str($poule['lien'], $params);
 
-                $poule['idpoule'] = $params['cx_poule'];
-                $poule['iddiv'] = $params['D1'];
+                $poule['idpoule'] = isset($params['cx_poule']) ? $params['cx_poule'] : null;
+                $poule['iddiv'] = isset($params['D1']) ? $params['D1'] : null;
             }
 
             return $poules;
@@ -399,9 +400,10 @@ if (!class_exists('AccesFFTTApi')) {
                 $url .= '?' . http_build_query($params);
             }
 
-            // Stocker le log pour affichage dans l'interface admin
-            $this->addApiLog("Appel API: $url");
-            error_log("DataPing - Appel API: $url");
+            // Stocker le log pour affichage dans l'interface admin (URL sans credentials)
+            $logUrl = preg_replace('/([?&])(id|serie|tm|tmc)=[^&]*/', '$1[REDACTED]', $url);
+            $this->addApiLog("Appel API: $logUrl");
+            error_log("DataPing - Appel API: $logUrl");
 
             $curl = curl_init();
             curl_setopt($curl, CURLOPT_URL, $url);
@@ -422,7 +424,7 @@ if (!class_exists('AccesFFTTApi')) {
             $curlErrno = curl_errno($curl);
             $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
             $contentType = curl_getinfo($curl, CURLINFO_CONTENT_TYPE);
-            $dataLength = strlen($data);
+            $dataLength = is_string($data) ? strlen($data) : 0;
             curl_close($curl);
 
             // Log de diagnostic

@@ -59,14 +59,14 @@
             <?php
                 /** @var Joueur $joueur */
             ?>
-        <tr class="<?php echo $joueur->getSexe(); ?>">
-            <td><?php echo $joueur->getClassement()->getRangNational() ; ?></td>
-            <td><?php echo $joueur->getClassement()->getRangDepartemental() ; ?></td>
-            <td><?php echo $joueur->getClassement()->getPointsMensuels() ; ?></td>
-            <td class="bold"><?php echo $joueur->getNom() ; ?></td>
-            <td class="bold"><?php echo $joueur->getPrenom() ; ?></td>
-            <td><?php echo $joueur->getClassement()->getClassementOfficiel() ; ?></td>
-            <td><?php echo $joueur->getClassement()->getPointsOfficiels() ; ?></td>
+        <tr class="<?php echo esc_attr($joueur->getSexe()); ?>">
+            <td><?php echo esc_html($joueur->getClassement()->getRangNational()); ?></td>
+            <td><?php echo esc_html($joueur->getClassement()->getRangDepartemental()); ?></td>
+            <td><?php echo esc_html($joueur->getClassement()->getPointsMensuels()); ?></td>
+            <td class="bold"><?php echo esc_html($joueur->getNom()); ?></td>
+            <td class="bold"><?php echo esc_html($joueur->getPrenom()); ?></td>
+            <td><?php echo esc_html($joueur->getClassement()->getClassementOfficiel()); ?></td>
+            <td><?php echo esc_html($joueur->getClassement()->getPointsOfficiels()); ?></td>
         </tr>
         <?php endforeach; ?>
         </tbody>

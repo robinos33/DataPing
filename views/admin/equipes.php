@@ -27,9 +27,9 @@
 				?>
 				<tr>
 					<th scope="row" class="check-column"><input type="checkbox"/></th>
-					<td><?php echo $equipe->getLibequipe(); ?></td>
-					<td><?php echo $equipe->getLibdivision(); ?></td>
-					<td><?php echo '[equipe iddiv="' . $equipe->getIddiv() . '" idpoule="' . $equipe->getIdpoule() . '"]'; ?></td>
+					<td><?php echo esc_html($equipe->getLibequipe()); ?></td>
+					<td><?php echo esc_html($equipe->getLibdivision()); ?></td>
+					<td><?php echo esc_html('[equipe iddiv="' . $equipe->getIddiv() . '" idpoule="' . $equipe->getIdpoule() . '"]'); ?></td>
 				</tr>
 				<?php
 			}

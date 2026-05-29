@@ -298,7 +298,7 @@ class DataPing
             if (empty($idApp) || empty($motDePasse)) {
                 throw new Exception('Identifiants API FFTT non configurés');
             }
-            $debugLog[] = "ID Application: " . $idApp;
+            $debugLog[] = "ID Application: configuré";
 
             // Synchronisation des joueurs
             $api->clearJoueursCache($numClub);

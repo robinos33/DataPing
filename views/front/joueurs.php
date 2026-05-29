@@ -30,9 +30,9 @@
                     // Ajouter la classe du sexe pour la couleur
                     $class .= ' ' . $joueur->getSexe();
                     ?>
-                    <tr class="<?php echo $class ?>">
-                        <td><?php echo $joueur->getNom(); ?></td>
-                        <td><?php echo $joueur->getPrenom(); ?></td>
+                    <tr class="<?php echo esc_attr($class); ?>">
+                        <td><?php echo esc_html($joueur->getNom()); ?></td>
+                        <td><?php echo esc_html($joueur->getPrenom()); ?></td>
                         <td class="center"><?php echo $joueur->getClassement()->getClassementOfficiel(); ?></td>
                         <td class="center"><?php echo $joueur->getClassement()->getPointsOfficiels(); ?></td>
                         <td class="center"><?php echo $joueur->getClassement()->getPointsMensuels(); ?></td>
