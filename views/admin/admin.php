@@ -24,8 +24,8 @@ if (isset($_GET['settings-updated']) && $_GET['settings-updated']) {
             echo '<p><em>Aucune synchronisation manuelle effectuée</em></p>';
         }
         ?>
-        <button id="dataping-sync-button" class="button button-primary">
-            <span class="dashicons dashicons-update" style="vertical-align: middle;"></span>
+        <button id="dataping-sync-button" class="button button-primary" style="display:inline-flex; align-items:center; gap:6px; line-height:1;">
+            <span aria-hidden="true" style="font-family:dashicons; display:inline-block; font-size:20px; line-height:1; width:20px; height:20px; flex-shrink:0; speak:none; -webkit-font-smoothing:antialiased;">&#xf463;</span>
             Synchroniser les données
         </button>
         <span id="dataping-sync-loading" style="display: none; margin-left: 10px;">
