@@ -1,61 +1,60 @@
 <?php require_once(__DIR__ . '/header.php'); ?>
 <div class="DataPing_div">
     <?php if ($updatedAt !== false): ?>
-        <p style="font-size: 0.9em; color: #666; margin-bottom: 10px;">
-            <em>Dernière mise à jour : <?php echo date('d/m/Y à H:i:s', $updatedAt); ?></em>
+        <p class="dataping-updated-at">
+            Dernière mise à jour : <?php echo esc_html(date('d/m/Y à H:i:s', $updatedAt)); ?>
         </p>
     <?php endif; ?>
     <table class="listeJoueurs sortableTable">
         <thead>
-        <th width="135">Nom</th>
-        <th width="135">Prénom</th>
-        <th>Class. <br />Off.</th>
-        <th>Points <br />Off.</th>
-        <th>Points <br />Mens.</th>
-        <th>Progr. <br />Mens.</th>
-        <th>Progr. <br />Ann.</th>
+        <tr>
+            <th>Nom</th>
+            <th>Prénom</th>
+            <th>Cl. Off.</th>
+            <th>Pts Off.</th>
+            <th>Pts Mens.</th>
+            <th>↕ Mens.</th>
+            <th>↕ Ann.</th>
+        </tr>
         </thead>
         <tbody>
             <?php
             $i = 0;
             foreach ($joueurs->getJoueurs($atts['type']) as $joueur) {
                 if (!is_null($joueur->getClassement()->getClassementOfficiel())) {
-                    //Affichage pair/impair
                     $i++;
-                    if ($i % 2 == 0) {
-                        $class = 'odd';
-                    } else {
-                        $class = 'even';
-                    }
-                    // Ajouter la classe du sexe pour la couleur
+                    $class = ($i % 2 == 0) ? 'odd' : 'even';
                     $class .= ' ' . $joueur->getSexe();
+
+                    $progMens = $joueur->getClassement()->getProgressionMensuelle();
+                    $progAnn  = $joueur->getClassement()->getProgressionAnnuelle();
                     ?>
                     <tr class="<?php echo esc_attr($class); ?>">
-                        <td><?php echo esc_html($joueur->getNom()); ?></td>
+                        <td class="dataping-nom"><?php echo esc_html($joueur->getNom()); ?></td>
                         <td><?php echo esc_html($joueur->getPrenom()); ?></td>
-                        <td class="center"><?php echo $joueur->getClassement()->getClassementOfficiel(); ?></td>
-                        <td class="center"><?php echo $joueur->getClassement()->getPointsOfficiels(); ?></td>
-                        <td class="center"><?php echo $joueur->getClassement()->getPointsMensuels(); ?></td>
+                        <td class="center"><?php echo esc_html($joueur->getClassement()->getClassementOfficiel()); ?></td>
+                        <td class="center"><?php echo esc_html($joueur->getClassement()->getPointsOfficiels()); ?></td>
+                        <td class="center"><?php echo esc_html($joueur->getClassement()->getPointsMensuels()); ?></td>
                         <td class="center">
                             <?php
-                            $color = '';
-                            if ($joueur->getClassement()->getProgressionMensuelle() > 0) {
-                                $color = 'vert';
-                            } elseif ($joueur->getClassement()->getProgressionMensuelle() < 0) {
-                                $color = 'rouge';
+                            if ($progMens > 0) {
+                                echo '<span class="dataping-badge dataping-badge--up">+' . esc_html($progMens) . '</span>';
+                            } elseif ($progMens < 0) {
+                                echo '<span class="dataping-badge dataping-badge--down">' . esc_html($progMens) . '</span>';
+                            } else {
+                                echo '<span class="dataping-badge dataping-badge--neutral">—</span>';
                             }
-                            echo '<span class="' . $color . '">' . $joueur->getClassement()->getProgressionMensuelle() . '</span>';
                             ?>
                         </td>
                         <td class="center">
                             <?php
-                            $color = '';
-                            if ($joueur->getClassement()->getProgressionAnnuelle() > 0) {
-                                $color = 'vert';
-                            } elseif ($joueur->getClassement()->getProgressionAnnuelle() < 0) {
-                                $color = 'rouge';
+                            if ($progAnn > 0) {
+                                echo '<span class="dataping-badge dataping-badge--up">+' . esc_html($progAnn) . '</span>';
+                            } elseif ($progAnn < 0) {
+                                echo '<span class="dataping-badge dataping-badge--down">' . esc_html($progAnn) . '</span>';
+                            } else {
+                                echo '<span class="dataping-badge dataping-badge--neutral">—</span>';
                             }
-                            echo '<span class="' . $color . '">' . $joueur->getClassement()->getProgressionAnnuelle() . '</span>';
                             ?>
                         </td>
                     </tr>

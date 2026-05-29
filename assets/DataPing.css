@@ -1,7 +1,7 @@
 /* FRONT-OFFICE */
 .DataPing_div{
-    margin: auto;
-    width: 95%;
+    margin: 0;
+    width: 100%;
     text-align: center;
 }
 
@@ -86,24 +86,102 @@
     width:4%;
 }
 
-/* Joueurs */
-.DataPing_div .listeJoueurs th{
-   font-size: 13px;
-   text-align: center;
-   vertical-align: middle;
+/* Joueurs — modern table */
+.DataPing_div .listeJoueurs {
+    border-collapse: collapse;
+    border-spacing: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    overflow: hidden;
+    border: none;
 }
 
-.DataPing_div .listeJoueurs td{
-    font-size:11px;
+.DataPing_div .listeJoueurs thead tr {
+    background-color: #2c3e50;
 }
 
-/* Couleurs par sexe pour les joueurs */
-.DataPing_div .listeJoueurs tr.F td{
-    color: #e74c3c;
+.DataPing_div .listeJoueurs th {
+    background-color: #2c3e50;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    vertical-align: middle;
+    padding: 11px 14px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border: none;
 }
 
-.DataPing_div .listeJoueurs tr.M td{
-    color: #3498db;
+.DataPing_div .listeJoueurs td {
+    padding: 9px 14px;
+    font-size: 13px;
+    border-right: none;
+    border-bottom: 1px solid #ececec;
+    vertical-align: middle;
+}
+
+.DataPing_div .listeJoueurs tr.odd {
+    background-color: #ffffff;
+}
+
+.DataPing_div .listeJoueurs tr.even {
+    background-color: #f7f9fb;
+}
+
+.DataPing_div .listeJoueurs tbody tr:hover {
+    background-color: #eaf3fb !important;
+    transition: background-color 0.15s ease;
+}
+
+/* Couleurs par sexe */
+.DataPing_div .listeJoueurs tr.F td {
+    color: #c0392b;
+}
+
+.DataPing_div .listeJoueurs tr.M td {
+    color: #2980b9;
+}
+
+/* Player name */
+.DataPing_div .listeJoueurs .dataping-nom {
+    font-weight: 600;
+    text-align: left;
+}
+
+/* Progression badges */
+.dataping-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+}
+
+.dataping-badge--up {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.dataping-badge--down {
+    background-color: #fdecea;
+    color: #c62828;
+}
+
+.dataping-badge--neutral {
+    background-color: #f0f0f0;
+    color: #999;
+}
+
+/* Last update timestamp */
+.dataping-updated-at {
+    font-size: 12px;
+    color: #aaa;
+    text-align: right;
+    margin-bottom: 8px;
+    font-style: italic;
 }
 
 span.rouge {
