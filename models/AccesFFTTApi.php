@@ -105,19 +105,19 @@ if (!class_exists('AccesFFTTApi')) {
         public function initialization()
         {
             // L'API xml_initialisation.php retourne souvent une réponse vide, on ignore les erreurs de parsing
-            return AccesFFTTApi::getObject($this->getData('https://apiv2.fftt.com/mobile/pxml/xml_initialisation.php', array(), true, true));
+            return AccesFFTTApi::getObject($this->getData('https://www.fftt.com/mobile/pxml/xml_initialisation.php', array(), true, true));
         }
 
         public function getClubsByDepartement($departement)
         {
             //return $this->getCachedData("clubs{$departement}", 3600 * 24 * 30, function ($this) use ($departement) {
-                return AccesFFTTApi::getCollection($this->getData('https://apiv2.fftt.com/mobile/pxml/xml_club_dep2.php', array('dep' => $departement)), 'club');
+                return AccesFFTTApi::getCollection($this->getData('https://www.fftt.com/mobile/pxml/xml_club_dep2.php', array('dep' => $departement)), 'club');
             //});
         }
 
         public function getClub($numero)
         {
-            return AccesFFTTApi::getObject($this->getData('https://apiv2.fftt.com/mobile/pxml/xml_club_detail.php', array('club' => $numero)), 'club');
+            return AccesFFTTApi::getObject($this->getData('https://www.fftt.com/mobile/pxml/xml_club_detail.php', array('club' => $numero)), 'club');
         }
 
         public function getJoueur($licence)
@@ -159,7 +159,7 @@ if (!class_exists('AccesFFTTApi')) {
             $key = $this->buildCacheKey('equipes_club', array('numclu' => $club, 'type' => $type));
             $lifeTime = $this->computeHalfDayTtl();
             $teams = $this->getCachedData($key, $lifeTime, function () use ($club, $type) {
-                $data = $this->getData('https://apiv2.fftt.com/mobile/pxml/xml_equipe.php', array('numclu' => $club, 'type' => $type));
+                $data = $this->getData('https://www.fftt.com/mobile/pxml/xml_equipe.php', array('numclu' => $club, 'type' => $type));
                 error_log("DataPing - getEquipesByClub($club, $type) - getData result: " . (is_array($data) ? json_encode($data) : gettype($data)));
                 $result = AccesFFTTApi::getCollection($data, 'equipe');
                 error_log("DataPing - getEquipesByClub($club, $type) - getCollection result count: " . count($result));
@@ -208,7 +208,7 @@ if (!class_exists('AccesFFTTApi')) {
 
         public function getPoules($division)
         {
-            $poules = AccesFFTTApi::getCollection($this->getData('https://apiv2.fftt.com/mobile/pxml/xml_result_equ.php', array('action' => 'poule', 'D1' => $division)), 'poule');
+            $poules = AccesFFTTApi::getCollection($this->getData('https://www.fftt.com/mobile/pxml/xml_result_equ.php', array('action' => 'poule', 'D1' => $division)), 'poule');
 
             foreach ($poules as &$poule) {
                 $params = array();
@@ -226,7 +226,7 @@ if (!class_exists('AccesFFTTApi')) {
             $key = $this->buildCacheKey('poule_classement', array('D1' => $division, 'cx_poule' => $poule));
             $lifeTime = $this->computeHalfDayTtl();
             return $this->getCachedData($key, $lifeTime, function () use ($division, $poule) {
-                return AccesFFTTApi::getCollection($this->getData('https://apiv2.fftt.com/mobile/pxml/xml_result_equ.php', array('auto' => 1, 'action' => 'classement', 'D1' => $division, 'cx_poule' => $poule)), 'classement');
+                return AccesFFTTApi::getCollection($this->getData('https://www.fftt.com/mobile/pxml/xml_result_equ.php', array('auto' => 1, 'action' => 'classement', 'D1' => $division, 'cx_poule' => $poule)), 'classement');
             });
         }
 
@@ -235,7 +235,7 @@ if (!class_exists('AccesFFTTApi')) {
             $key = $this->buildCacheKey('poule_rencontres', array('D1' => $division, 'cx_poule' => $poule));
             $lifeTime = $this->computeHalfDayTtl();
             return $this->getCachedData($key, $lifeTime, function () use ($division, $poule) {
-                return AccesFFTTApi::getCollection($this->getData('https://apiv2.fftt.com/mobile/pxml/xml_result_equ.php', array('auto' => 1, 'D1' => $division, 'cx_poule' => $poule)), 'tour');
+                return AccesFFTTApi::getCollection($this->getData('https://www.fftt.com/mobile/pxml/xml_result_equ.php', array('auto' => 1, 'D1' => $division, 'cx_poule' => $poule)), 'tour');
             });
         }
 
@@ -257,6 +257,12 @@ if (!class_exists('AccesFFTTApi')) {
         public function getLicence($licence)
         {
             return AccesFFTTApi::getObject($this->getData('https://www.fftt.com/mobile/pxml/xml_licence.php', array('licence' => $licence)), 'licence');
+        }
+
+        public function getLicencesByClubComplet($club)
+        {
+            $data = $this->getData('https://www.fftt.com/mobile/pxml/xml_licence_b.php', array('club' => $club));
+            return AccesFFTTApi::getCollection($data, 'licence');
         }
 
         private function getCachedData($key, $lifeTime, $callback)

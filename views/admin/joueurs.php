@@ -43,8 +43,6 @@
     <table class="wp-list-table widefat fixed striped posts">
         <thead>
         <tr>
-            <th>Rang Nat</th>
-            <th>Rang Dep</th>
             <th>Points mensuels</th>
             <th>Nom</th>
             <th>Prénom</th>
@@ -60,8 +58,6 @@
                 /** @var Joueur $joueur */
             ?>
         <tr class="<?php echo esc_attr($joueur->getSexe()); ?>">
-            <td><?php echo esc_html($joueur->getClassement()->getRangNational()); ?></td>
-            <td><?php echo esc_html($joueur->getClassement()->getRangDepartemental()); ?></td>
             <td><?php echo esc_html($joueur->getClassement()->getPointsMensuels()); ?></td>
             <td class="bold"><?php echo esc_html($joueur->getNom()); ?></td>
             <td class="bold"><?php echo esc_html($joueur->getPrenom()); ?></td>

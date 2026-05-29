@@ -27,27 +27,17 @@ if (!class_exists('joueurs')) {
             $lifeTime = $this->_api->computeHalfDayTtlPublic();
 
             $joueursData = $this->_api->getCachedDataPublic($cacheKey, $lifeTime, function() use ($club) {
-                // xml_liste_joueur.php retourne la liste basique, il faut enrichir avec xml_joueur.php
-                $licencies = $this->_api->getLicencesByClub($club);
-                $joueursData = array();
-
-                foreach ($licencies as $licencie) {
-                    // Récupérer les données complètes du joueur (classement, points, rangs, etc.)
-                    $joueurComplet = $this->_api->getJoueur($licencie['licence']);
-
-                    if ($joueurComplet) {
-                        $joueursData[] = array(
-                            'licence' => $joueurComplet,
-                            'classement' => $joueurComplet
-                        );
-                    }
-                }
-
-                return $joueursData;
+                return $this->_api->getLicencesByClubComplet($club);
             });
 
+            if (!is_array($joueursData)) {
+                return;
+            }
+
             foreach ($joueursData as $joueurData) {
-                $this->joueurs[] = new Joueur($joueurData['licence'], $joueurData['classement']);
+                if (!empty($joueurData)) {
+                    $this->joueurs[] = new Joueur($joueurData);
+                }
             }
         }
 

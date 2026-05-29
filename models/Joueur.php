@@ -14,19 +14,18 @@ if (!class_exists('joueur')) {
         private $etranger;
 
         /**
-         * Initialisation du joueur
-         * @param array $donneesLicence
-         * @param array|null $donneesClassement
+         * Initialisation du joueur depuis les données xml_licence_b.php
+         * @param array $donnees Données brutes retournées par l'API
          */
-        public function __construct($donneesLicence, $donneesClassement) {
-            $this->setClassement($donneesClassement);
-            $this->setClub($donneesLicence['club'] ?? '');
-            $this->setNom($donneesLicence['nom'] ?? '');
-            $this->setPrenom($donneesLicence['prenom'] ?? '');
-            $this->setSexe($donneesLicence['sexe'] ?? '');
-            $this->setLicence($donneesLicence['licence'] ?? '');
-            $this->setCategorie($donneesClassement['cat'] ?? '');
-            $this->setEtranger($donneesClassement['natio'] ?? 'F');
+        public function __construct($donnees) {
+            $this->setClassement($donnees);
+            $this->setClub($donnees['numclub'] ?? '');
+            $this->setNom($donnees['nom'] ?? '');
+            $this->setPrenom($donnees['prenom'] ?? '');
+            $this->setSexe($donnees['sexe'] ?? '');
+            $this->setLicence($donnees['licence'] ?? '');
+            $this->setCategorie($donnees['cat'] ?? '');
+            $this->setEtranger($donnees['natio'] ?? 'F');
         }
 
         public function getNom() {
@@ -50,7 +49,6 @@ if (!class_exists('joueur')) {
         }
 
         /**
-         *
          * @return Classement
          */
         public function getClassement() {
@@ -74,13 +72,11 @@ if (!class_exists('joueur')) {
         }
 
         public function setClub($numClub) {
-            // Ne pas créer d'objet Club pour éviter des appels API inutiles
-            // Tous les joueurs sont du même club, on stocke juste le numéro
             $this->club = $numClub;
         }
 
-        public function setClassement($donneesClassement) {
-            $this->classement = new Classement($donneesClassement);
+        public function setClassement($donnees) {
+            $this->classement = new Classement($donnees);
         }
 
         public function getCategorie() {
@@ -96,7 +92,6 @@ if (!class_exists('joueur')) {
         }
 
         public function setEtranger($natio) {
-            // Si natio == 'E', c'est un joueur étranger
             $this->etranger = ($natio === 'E');
         }
 
