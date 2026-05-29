@@ -541,8 +541,8 @@ class DataPing
             <?php endif; ?>
 
             <p>
-                <button id="dataping-dashboard-sync-button" class="button button-primary button-large" style="width:100%; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
-                    <span class="dashicons dashicons-update" style="width:18px; height:18px; font-size:18px;"></span>
+                <button id="dataping-dashboard-sync-button" class="button button-primary button-large" style="width:100%; display:inline-flex; align-items:center; justify-content:center; gap:6px; line-height:1;">
+                    <span class="dashicons dashicons-update"></span>
                     Synchroniser les données
                 </button>
             </p>
