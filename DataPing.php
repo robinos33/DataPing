@@ -544,7 +544,7 @@ class DataPing
 
             <p>
                 <button id="dataping-dashboard-sync-button" class="button button-primary button-large" style="width:100%; display:inline-flex; align-items:center; justify-content:center; gap:6px; line-height:1;">
-                    <span class="dataping-icon dashicons-update"></span>
+                    <span aria-hidden="true" style="font-family:dashicons; display:inline-block; font-size:20px; line-height:1; width:20px; height:20px; flex-shrink:0; speak:none; -webkit-font-smoothing:antialiased;">&#xf463;</span>
                     Synchroniser les données
                 </button>
             </p>
