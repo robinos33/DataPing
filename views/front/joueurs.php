@@ -5,7 +5,7 @@
             Dernière mise à jour : <?php echo esc_html(date('d/m/Y à H:i:s', $updatedAt)); ?>
         </p>
     <?php endif; ?>
-    <table class="listeJoueurs sortableTable">
+    <table class="dataping-table listeJoueurs sortableTable">
         <thead>
         <tr>
             <th>Nom</th>
