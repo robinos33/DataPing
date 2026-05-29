@@ -227,6 +227,21 @@ th.headerSortUp {
     background-image: url(tablesorter/img/asc.gif); 
 } 
 
+/* Icône dans les boutons admin — hors portée de .wp-core-ui .button .dashicons */
+.dataping-icon {
+    font-family: dashicons;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+    line-height: 1;
+    font-weight: 400;
+    font-style: normal;
+    speak: never;
+    -webkit-font-smoothing: antialiased;
+    flex-shrink: 0;
+}
+
 /* ADMIN */
 .DataPing_nonoff{
     font-size: 15px;

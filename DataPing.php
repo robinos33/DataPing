@@ -542,7 +542,7 @@ class DataPing
 
             <p>
                 <button id="dataping-dashboard-sync-button" class="button button-primary button-large" style="width:100%; display:inline-flex; align-items:center; justify-content:center; gap:6px; line-height:1;">
-                    <span class="dashicons dashicons-update" style="line-height:1;"></span>
+                    <span class="dataping-icon dashicons-update"></span>
                     Synchroniser les données
                 </button>
             </p>
@@ -608,10 +608,20 @@ class DataPing
         .dataping-dashboard-widget .spinner {
             visibility: visible;
         }
-        /* Neutralise le line-height:1.9 imposé par WP sur .button .dashicons */
-        #dataping-dashboard-sync-button .dashicons {
-            line-height: 1 !important;
-            vertical-align: middle !important;
+        /* Icône bouton : même rendu que .dashicons mais hors portée de la règle
+           .wp-core-ui .button .dashicons { line-height:1.9; vertical-align:top } */
+        .dataping-icon {
+            font-family: dashicons;
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            font-size: 20px;
+            line-height: 1;
+            font-weight: 400;
+            font-style: normal;
+            speak: never;
+            -webkit-font-smoothing: antialiased;
+            flex-shrink: 0;
         }
         </style>
         <?php
