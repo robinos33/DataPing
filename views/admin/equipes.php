@@ -1,40 +1,187 @@
 <?php
-
+$equipes      = new Equipes();
+$listeEquipes = $equipes->getEquipesChampionnat('MF');
+$nonce        = wp_create_nonce('dataping_generate_pages_nonce');
 ?>
 <div class="wrap">
-	<h1 class="DataPing_title">Les équipes </h1>
+    <h1 class="DataPing_title">Les équipes</h1>
 
-	<p>Insérez le shortcode dans la page ou l'article où vous désirez afficher la poule de chaque équipe</p>
+    <p>Sélectionnez les équipes pour lesquelles vous souhaitez générer une page WordPress,
+       puis cliquez sur <strong>Générer les pages</strong>. Les pages seront créées (ou mises à jour)
+       sous une page parent <em>Équipes</em>.</p>
 
-	<form class="DataPing_liste_admin">
-		<table class="wp-list-table widefat fixed striped posts">
-			<thead>
-			<tr>
-				<td id="cb" class="manage-column column-cb check-column"><label class="screen-reader-text"
-				                                                                for="cb-select-all-1">Select All</label><input
-						id="cb-select-all-1" type="checkbox"></td>
-				<th>Equipe</th>
-				<th>Division</th>
-				<th>Shortcode</th>
-			</tr>
-			</thead>
-			<tbody id="the-list">
-			<?php
-			$equipes      = new Equipes();
-			$listeEquipes = $equipes->getEquipes( 'MF' );
-			foreach ( $listeEquipes as $equipe ) {
-				/* @var Equipe $equipe */
-				?>
-				<tr>
-					<th scope="row" class="check-column"><input type="checkbox"/></th>
-					<td><?php echo esc_html($equipe->getLibequipe()); ?></td>
-					<td><?php echo esc_html($equipe->getLibdivision()); ?></td>
-					<td><?php echo esc_html('[equipe iddiv="' . $equipe->getIddiv() . '" idpoule="' . $equipe->getIdpoule() . '"]'); ?></td>
-				</tr>
-				<?php
-			}
-			?>
-			</tbody>
-		</table>
-	</form>
+    <div style="margin-bottom: 12px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <button type="button" id="dataping-select-all" class="button">Tout sélectionner</button>
+        <button type="button" id="dataping-deselect-all" class="button">Tout désélectionner</button>
+        <button type="button" id="dataping-generate-btn" class="button button-primary button-large">
+            <span class="dashicons dashicons-welcome-add-page" style="vertical-align: middle;"></span>
+            Générer les pages sélectionnées
+        </button>
+        <span id="dataping-generate-spinner" class="spinner" style="float:none; margin:0;"></span>
+    </div>
+
+    <div id="dataping-generate-message" style="margin-bottom: 14px;"></div>
+
+    <table class="wp-list-table widefat fixed striped posts">
+        <thead>
+        <tr>
+            <td class="manage-column column-cb check-column">
+                <input id="dataping-check-all" type="checkbox" title="Tout cocher/décocher" />
+            </td>
+            <th>Équipe</th>
+            <th>Division</th>
+            <th style="width:320px;">Shortcode</th>
+        </tr>
+        </thead>
+        <tbody id="dataping-equipes-list">
+        <?php foreach ( $listeEquipes as $equipe ): /* @var Equipe $equipe */ ?>
+            <?php
+            $iddiv   = $equipe->getIddiv()   ?? '';
+            $idpoule = $equipe->getIdpoule() ?? '';
+            $hasIds  = !empty( $iddiv );
+            $shortcode = '[equipe iddiv="' . esc_attr( $iddiv ) . '" idpoule="' . esc_attr( $idpoule ) . '"]';
+            ?>
+            <tr class="<?php echo $hasIds ? '' : 'dataping-row-disabled'; ?>">
+                <th scope="row" class="check-column">
+                    <?php if ( $hasIds ): ?>
+                        <input
+                            type="checkbox"
+                            class="dataping-team-checkbox"
+                            data-iddiv="<?php echo esc_attr( $iddiv ); ?>"
+                            data-idpoule="<?php echo esc_attr( $idpoule ); ?>"
+                            data-libequipe="<?php echo esc_attr( $equipe->getLibequipe() ); ?>"
+                            checked
+                        />
+                    <?php endif; ?>
+                </th>
+                <td>
+                    <?php echo esc_html( $equipe->getLibequipe() ); ?>
+                    <?php if ( !$hasIds ): ?>
+                        <em style="color:#999; font-size:11px;"> (poule indisponible)</em>
+                    <?php endif; ?>
+                </td>
+                <td><?php echo esc_html( $equipe->getLibdivision() ); ?></td>
+                <td>
+                    <?php if ( $hasIds ): ?>
+                        <code
+                            class="dataping-shortcode"
+                            title="Cliquer pour copier"
+                            style="cursor:pointer; background:#f0f0f1; padding:3px 6px; border-radius:3px;"
+                        ><?php echo esc_html( $shortcode ); ?></code>
+                        <span class="dataping-copy-confirm" style="display:none; color:green; font-size:11px; margin-left:6px;">✓ Copié</span>
+                    <?php else: ?>
+                        <span style="color:#aaa;">—</span>
+                    <?php endif; ?>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table>
+
+    <p style="color:#666; font-size:12px; margin-top:10px;">
+        Seules les équipes de championnat par équipes sont listées (les coupes sont exclues).
+        <?php
+        $total = count( $equipes->getEquipes( 'MF' ) );
+        $champ = count( $listeEquipes );
+        echo esc_html( $champ . ' équipe(s) affichée(s) sur ' . $total . ' au total.' );
+        ?>
+    </p>
 </div>
+
+<style>
+.dataping-row-disabled td, .dataping-row-disabled th { opacity: 0.5; }
+</style>
+
+<script type="text/javascript">
+jQuery(document).ready(function ($) {
+
+    // Tout sélectionner / désélectionner via le header checkbox
+    $('#dataping-check-all').on('change', function () {
+        $('.dataping-team-checkbox').prop('checked', this.checked);
+    });
+
+    $('#dataping-select-all').on('click', function () {
+        $('.dataping-team-checkbox').prop('checked', true);
+        $('#dataping-check-all').prop('checked', true);
+    });
+
+    $('#dataping-deselect-all').on('click', function () {
+        $('.dataping-team-checkbox').prop('checked', false);
+        $('#dataping-check-all').prop('checked', false);
+    });
+
+    // Copie du shortcode au clic
+    $(document).on('click', '.dataping-shortcode', function () {
+        var text = $(this).text();
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(text);
+        } else {
+            var el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+        }
+        var confirm = $(this).next('.dataping-copy-confirm');
+        confirm.stop(true).fadeIn(100).delay(1500).fadeOut(400);
+    });
+
+    // Génération des pages
+    $('#dataping-generate-btn').on('click', function () {
+        var teams = [];
+        $('.dataping-team-checkbox:checked').each(function () {
+            teams.push({
+                iddiv:     $(this).data('iddiv'),
+                idpoule:   $(this).data('idpoule'),
+                libequipe: $(this).data('libequipe')
+            });
+        });
+
+        if (teams.length === 0) {
+            $('#dataping-generate-message').html(
+                '<div class="notice notice-warning inline"><p>Aucune équipe sélectionnée.</p></div>'
+            );
+            return;
+        }
+
+        var $btn     = $(this);
+        var $spinner = $('#dataping-generate-spinner');
+        var $msg     = $('#dataping-generate-message');
+
+        $btn.prop('disabled', true);
+        $spinner.addClass('is-active');
+        $msg.html('');
+
+        $.ajax({
+            url:  ajaxurl,
+            type: 'POST',
+            data: {
+                action: 'dataping_generate_pages',
+                nonce:  '<?php echo esc_js( $nonce ); ?>',
+                teams:  teams
+            },
+            success: function (response) {
+                $spinner.removeClass('is-active');
+                $btn.prop('disabled', false);
+                if (response.success) {
+                    var d = response.data;
+                    var link = d.parent_url
+                        ? ' <a href="' + d.parent_url + '" target="_blank">Voir la page parent</a>'
+                        : '';
+                    $msg.html('<div class="notice notice-success inline"><p><strong>✓ ' +
+                        d.message + '</strong>' + link + '</p></div>');
+                } else {
+                    $msg.html('<div class="notice notice-error inline"><p><strong>Erreur :</strong> ' +
+                        response.data.message + '</p></div>');
+                }
+            },
+            error: function () {
+                $spinner.removeClass('is-active');
+                $btn.prop('disabled', false);
+                $msg.html('<div class="notice notice-error inline"><p>Erreur de communication avec le serveur.</p></div>');
+            }
+        });
+    });
+});
+</script>

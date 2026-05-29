@@ -481,7 +481,7 @@ if (!class_exists('AccesFFTTApi')) {
                 $data = preg_replace('/encoding=["\']ISO-8859-1["\']/i', 'encoding="UTF-8"', $data);
             }
 
-            $xml = simplexml_load_string($data);
+            $xml = simplexml_load_string($data, 'SimpleXMLElement', LIBXML_NOCDATA);
 
             if (!$xml) {
                 if (!$silentErrors) {

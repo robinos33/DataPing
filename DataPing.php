@@ -36,8 +36,9 @@ class DataPing
         add_filter('dataping_get_classement_poule', array($this, 'get_classement_poule_data'), 10, 2);
         add_filter('dataping_get_rencontres_poule', array($this, 'get_rencontres_poule_data'), 10, 2);
 
-        // AJAX handler pour la synchronisation manuelle
+        // AJAX handlers
         add_action('wp_ajax_dataping_sync', array($this, 'handle_ajax_sync'));
+        add_action('wp_ajax_dataping_generate_pages', array($this, 'handle_ajax_generate_pages'));
 
         // Widget dashboard
         add_action('wp_dashboard_setup', array($this, 'add_dashboard_widget'));
@@ -349,6 +350,90 @@ class DataPing
                 'debug' => isset($debugLog) ? $debugLog : array()
             ));
         }
+    }
+
+    /**
+     * Handler AJAX : génération automatique de pages WordPress pour les équipes sélectionnées.
+     * Crée (ou met à jour) une page WP par équipe sous une page parent "Équipes".
+     */
+    public function handle_ajax_generate_pages()
+    {
+        check_ajax_referer('dataping_generate_pages_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => 'Permissions insuffisantes'));
+            return;
+        }
+
+        $teams = isset($_POST['teams']) ? (array) $_POST['teams'] : array();
+        if (empty($teams)) {
+            wp_send_json_error(array('message' => 'Aucune équipe sélectionnée'));
+            return;
+        }
+
+        $parentId = $this->getOrCreateEquipesParentPage();
+        $created  = 0;
+        $updated  = 0;
+
+        foreach ($teams as $team) {
+            $iddiv   = sanitize_text_field($team['iddiv']    ?? '');
+            $idpoule = sanitize_text_field($team['idpoule']  ?? '');
+            $title   = sanitize_text_field($team['libequipe'] ?? '');
+
+            if (empty($iddiv) || empty($title)) {
+                continue;
+            }
+
+            $content  = '[equipe iddiv="' . $iddiv . '" idpoule="' . $idpoule . '"]';
+            $existing = get_page_by_title($title, OBJECT, 'page');
+
+            if ($existing) {
+                wp_update_post(array(
+                    'ID'           => $existing->ID,
+                    'post_content' => $content,
+                    'post_parent'  => $parentId,
+                    'post_status'  => 'publish',
+                ));
+                $updated++;
+            } else {
+                wp_insert_post(array(
+                    'post_title'   => $title,
+                    'post_content' => $content,
+                    'post_status'  => 'publish',
+                    'post_type'    => 'page',
+                    'post_parent'  => $parentId,
+                ));
+                $created++;
+            }
+        }
+
+        $parentUrl = get_permalink($parentId);
+        wp_send_json_success(array(
+            'message'    => $created . ' page(s) créée(s), ' . $updated . ' mise(s) à jour.',
+            'created'    => $created,
+            'updated'    => $updated,
+            'parent_url' => $parentUrl,
+        ));
+    }
+
+    /**
+     * Trouve ou crée la page parent "Équipes" pour les pages d'équipe.
+     * @return int ID de la page parent
+     */
+    private function getOrCreateEquipesParentPage()
+    {
+        $existing = get_page_by_path('equipes', OBJECT, 'page');
+        if ($existing) {
+            return $existing->ID;
+        }
+
+        return (int) wp_insert_post(array(
+            'post_title'   => 'Équipes',
+            'post_name'    => 'equipes',
+            'post_content' => '',
+            'post_status'  => 'publish',
+            'post_type'    => 'page',
+        ));
     }
 
     /**

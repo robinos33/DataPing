@@ -69,7 +69,7 @@ class Equipes {
 			case 'F':
 			case 'M':
 				foreach ( $this->_equipes as $equipe ) {
-					if($equipe->type === $sexe){
+					if($equipe->getType() === $sexe){
 						$equipes[] = $equipe;
 					}
 				}
@@ -77,5 +77,21 @@ class Equipes {
 		}
 
 		return $equipes;
+	}
+
+	/**
+	 * Retourne uniquement les équipes de championnat par équipes (exclut les coupes).
+	 * Filtre les épreuves dont le libellé contient "coupe" (insensible à la casse).
+	 *
+	 * @param string $sexe 'MF', 'M' ou 'F'
+	 * @return Equipe[]
+	 */
+	public function getEquipesChampionnat( $sexe = 'MF' ) {
+		return array_values( array_filter(
+			$this->getEquipes( $sexe ),
+			function ( $equipe ) {
+				return stripos( $equipe->getLibepr(), 'coupe' ) === false;
+			}
+		) );
 	}
 }
