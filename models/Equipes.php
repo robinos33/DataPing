@@ -94,4 +94,21 @@ class Equipes {
 			}
 		) );
 	}
+
+	/**
+	 * Retourne uniquement les équipes du championnat sénior par équipes.
+	 * Seules les épreuves dont le libellé contient "par equipes" sont conservées,
+	 * ce qui exclut les coupes, championnats jeunes et compétitions vétérans.
+	 *
+	 * @param string $sexe 'MF', 'M' ou 'F'
+	 * @return Equipe[]
+	 */
+	public function getEquipesSeniorChampionnat( $sexe = 'MF' ) {
+		return array_values( array_filter(
+			$this->getEquipes( $sexe ),
+			function ( $equipe ) {
+				return stripos( $equipe->getLibepr(), 'par equipes' ) !== false;
+			}
+		) );
+	}
 }

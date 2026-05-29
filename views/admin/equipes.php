@@ -1,21 +1,20 @@
 <?php
 $equipes      = new Equipes();
-$listeEquipes = $equipes->getEquipesChampionnat('MF');
+$listeEquipes = $equipes->getEquipesSeniorChampionnat('MF');
 $nonce        = wp_create_nonce('dataping_generate_pages_nonce');
 ?>
 <div class="wrap">
     <h1 class="DataPing_title">Les équipes</h1>
 
-    <p>Sélectionnez les équipes pour lesquelles vous souhaitez générer une page WordPress,
-       puis cliquez sur <strong>Générer les pages</strong>. Les pages seront créées (ou mises à jour)
-       sous une page parent <em>Équipes</em>.</p>
+    <p>Cochez les équipes pour lesquelles vous voulez une page WordPress, décochez celles
+       dont la page doit être supprimée, puis cliquez sur <strong>Appliquer la sélection</strong>.</p>
 
     <div style="margin-bottom: 12px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
         <button type="button" id="dataping-select-all" class="button">Tout sélectionner</button>
         <button type="button" id="dataping-deselect-all" class="button">Tout désélectionner</button>
         <button type="button" id="dataping-generate-btn" class="button button-primary button-large">
-            <span class="dashicons dashicons-welcome-add-page" style="vertical-align: middle;"></span>
-            Générer les pages sélectionnées
+            <span class="dashicons dashicons-yes-alt" style="vertical-align: middle;"></span>
+            Appliquer la sélection
         </button>
         <span id="dataping-generate-spinner" class="spinner" style="float:none; margin:0;"></span>
     </div>
@@ -36,9 +35,9 @@ $nonce        = wp_create_nonce('dataping_generate_pages_nonce');
         <tbody id="dataping-equipes-list">
         <?php foreach ( $listeEquipes as $equipe ): /* @var Equipe $equipe */ ?>
             <?php
-            $iddiv   = $equipe->getIddiv()   ?? '';
-            $idpoule = $equipe->getIdpoule() ?? '';
-            $hasIds  = !empty( $iddiv );
+            $iddiv     = $equipe->getIddiv()   ?? '';
+            $idpoule   = $equipe->getIdpoule() ?? '';
+            $hasIds    = !empty( $iddiv );
             $shortcode = '[equipe iddiv="' . esc_attr( $iddiv ) . '" idpoule="' . esc_attr( $idpoule ) . '"]';
             ?>
             <tr class="<?php echo $hasIds ? '' : 'dataping-row-disabled'; ?>">
@@ -79,11 +78,11 @@ $nonce        = wp_create_nonce('dataping_generate_pages_nonce');
     </table>
 
     <p style="color:#666; font-size:12px; margin-top:10px;">
-        Seules les équipes de championnat par équipes sont listées (les coupes sont exclues).
+        Championnat sénior par équipes uniquement.
         <?php
-        $total = count( $equipes->getEquipes( 'MF' ) );
-        $champ = count( $listeEquipes );
-        echo esc_html( $champ . ' équipe(s) affichée(s) sur ' . $total . ' au total.' );
+        $total  = count( $equipes->getEquipes( 'MF' ) );
+        $senior = count( $listeEquipes );
+        echo esc_html( $senior . ' équipe(s) affichée(s) sur ' . $total . ' au total.' );
         ?>
     </p>
 </div>
@@ -123,27 +122,26 @@ jQuery(document).ready(function ($) {
             document.execCommand('copy');
             document.body.removeChild(el);
         }
-        var confirm = $(this).next('.dataping-copy-confirm');
-        confirm.stop(true).fadeIn(100).delay(1500).fadeOut(400);
+        $(this).next('.dataping-copy-confirm').stop(true).fadeIn(100).delay(1500).fadeOut(400);
     });
 
-    // Génération des pages
+    // Appliquer la sélection : créer les cochés, supprimer les décochés
     $('#dataping-generate-btn').on('click', function () {
-        var teams = [];
-        $('.dataping-team-checkbox:checked').each(function () {
-            teams.push({
+        var teamsCreate = [];
+        var teamsDelete = [];
+
+        $('.dataping-team-checkbox').each(function () {
+            var data = {
                 iddiv:     $(this).data('iddiv'),
                 idpoule:   $(this).data('idpoule'),
                 libequipe: $(this).data('libequipe')
-            });
+            };
+            if ($(this).is(':checked')) {
+                teamsCreate.push(data);
+            } else {
+                teamsDelete.push(data);
+            }
         });
-
-        if (teams.length === 0) {
-            $('#dataping-generate-message').html(
-                '<div class="notice notice-warning inline"><p>Aucune équipe sélectionnée.</p></div>'
-            );
-            return;
-        }
 
         var $btn     = $(this);
         var $spinner = $('#dataping-generate-spinner');
@@ -157,17 +155,18 @@ jQuery(document).ready(function ($) {
             url:  ajaxurl,
             type: 'POST',
             data: {
-                action: 'dataping_generate_pages',
-                nonce:  '<?php echo esc_js( $nonce ); ?>',
-                teams:  teams
+                action:        'dataping_generate_pages',
+                nonce:         '<?php echo esc_js( $nonce ); ?>',
+                teams_create:  teamsCreate,
+                teams_delete:  teamsDelete
             },
             success: function (response) {
                 $spinner.removeClass('is-active');
                 $btn.prop('disabled', false);
                 if (response.success) {
-                    var d = response.data;
+                    var d    = response.data;
                     var link = d.parent_url
-                        ? ' <a href="' + d.parent_url + '" target="_blank">Voir la page parent</a>'
+                        ? ' — <a href="' + d.parent_url + '" target="_blank">Voir la page parent →</a>'
                         : '';
                     $msg.html('<div class="notice notice-success inline"><p><strong>✓ ' +
                         d.message + '</strong>' + link + '</p></div>');

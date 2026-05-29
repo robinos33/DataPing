@@ -353,8 +353,10 @@ class DataPing
     }
 
     /**
-     * Handler AJAX : génération automatique de pages WordPress pour les équipes sélectionnées.
-     * Crée (ou met à jour) une page WP par équipe sous une page parent "Équipes".
+     * Handler AJAX : synchronise les pages WordPress avec la sélection d'équipes.
+     * - Crée ou remet en ligne les pages des équipes cochées.
+     * - Met à la corbeille les pages des équipes décochées.
+     * Les pages générées sont tracées via le meta _dataping_iddiv / _dataping_idpoule.
      */
     public function handle_ajax_generate_pages()
     {
@@ -365,55 +367,114 @@ class DataPing
             return;
         }
 
-        $teams = isset($_POST['teams']) ? (array) $_POST['teams'] : array();
-        if (empty($teams)) {
-            wp_send_json_error(array('message' => 'Aucune équipe sélectionnée'));
+        $teamsCreate = isset($_POST['teams_create']) ? (array) $_POST['teams_create'] : array();
+        $teamsDelete = isset($_POST['teams_delete']) ? (array) $_POST['teams_delete'] : array();
+
+        if (empty($teamsCreate) && empty($teamsDelete)) {
+            wp_send_json_error(array('message' => 'Aucune équipe dans la liste'));
             return;
         }
 
         $parentId = $this->getOrCreateEquipesParentPage();
         $created  = 0;
         $updated  = 0;
+        $deleted  = 0;
 
-        foreach ($teams as $team) {
+        // ── 1. Supprimer (corbeille) les pages des équipes décochées ─────────
+        foreach ($teamsDelete as $team) {
+            $iddiv   = sanitize_text_field($team['iddiv']   ?? '');
+            $idpoule = sanitize_text_field($team['idpoule'] ?? '');
+            if (empty($iddiv)) {
+                continue;
+            }
+            $page = $this->findDataPingPage($iddiv, $idpoule);
+            if ($page) {
+                wp_trash_post($page->ID);
+                $deleted++;
+            }
+        }
+
+        // ── 2. Créer ou remettre en ligne les pages des équipes cochées ──────
+        foreach ($teamsCreate as $team) {
             $iddiv   = sanitize_text_field($team['iddiv']    ?? '');
             $idpoule = sanitize_text_field($team['idpoule']  ?? '');
             $title   = sanitize_text_field($team['libequipe'] ?? '');
-
             if (empty($iddiv) || empty($title)) {
                 continue;
             }
 
-            $content  = '[equipe iddiv="' . $iddiv . '" idpoule="' . $idpoule . '"]';
-            $existing = get_page_by_title($title, OBJECT, 'page');
+            $content = '[equipe iddiv="' . $iddiv . '" idpoule="' . $idpoule . '"]';
+            // Chercher d'abord par meta (page déjà gérée par DataPing, y.c. à la corbeille)
+            $page = $this->findDataPingPage($iddiv, $idpoule, true);
 
-            if ($existing) {
+            if ($page) {
                 wp_update_post(array(
-                    'ID'           => $existing->ID,
+                    'ID'           => $page->ID,
+                    'post_title'   => $title,
                     'post_content' => $content,
                     'post_parent'  => $parentId,
                     'post_status'  => 'publish',
                 ));
                 $updated++;
             } else {
-                wp_insert_post(array(
+                $pageId = (int) wp_insert_post(array(
                     'post_title'   => $title,
                     'post_content' => $content,
                     'post_status'  => 'publish',
                     'post_type'    => 'page',
                     'post_parent'  => $parentId,
                 ));
+                update_post_meta($pageId, '_dataping_iddiv',   $iddiv);
+                update_post_meta($pageId, '_dataping_idpoule', $idpoule);
                 $created++;
+                continue; // meta déjà posé, on passe
             }
+
+            // Mettre à jour les metas (au cas où elles manquaient)
+            update_post_meta($page->ID, '_dataping_iddiv',   $iddiv);
+            update_post_meta($page->ID, '_dataping_idpoule', $idpoule);
         }
 
         $parentUrl = get_permalink($parentId);
+        $parts = array();
+        if ($created) { $parts[] = $created . ' créée(s)'; }
+        if ($updated) { $parts[] = $updated . ' mise(s) à jour'; }
+        if ($deleted) { $parts[] = $deleted . ' mise(s) à la corbeille'; }
+        $message = $parts ? implode(', ', $parts) . '.' : 'Aucune modification.';
+
         wp_send_json_success(array(
-            'message'    => $created . ' page(s) créée(s), ' . $updated . ' mise(s) à jour.',
+            'message'    => $message,
             'created'    => $created,
             'updated'    => $updated,
+            'deleted'    => $deleted,
             'parent_url' => $parentUrl,
         ));
+    }
+
+    /**
+     * Recherche une page WP générée par DataPing via ses metas iddiv/idpoule.
+     *
+     * @param string $iddiv
+     * @param string $idpoule
+     * @param bool   $includeTrashed Inclure les pages à la corbeille
+     * @return WP_Post|null
+     */
+    private function findDataPingPage($iddiv, $idpoule, $includeTrashed = false)
+    {
+        $statuses = array('publish', 'draft', 'private');
+        if ($includeTrashed) {
+            $statuses[] = 'trash';
+        }
+        $query = new WP_Query(array(
+            'post_type'      => 'page',
+            'post_status'    => $statuses,
+            'posts_per_page' => 1,
+            'meta_query'     => array(
+                array('key' => '_dataping_iddiv',   'value' => $iddiv),
+                array('key' => '_dataping_idpoule', 'value' => $idpoule),
+            ),
+        ));
+        return $query->have_posts() ? $query->posts[0] : null;
     }
 
     /**
