@@ -75,8 +75,8 @@ Les données sont mises en cache via les **transients WordPress** :
 | Données | Durée |
 |---------|-------|
 | Joueurs du club | Jusqu'à la prochaine sync |
-| Classement de poule | 8h |
-| Résultats par journée | 8h |
+| Classement de poule | 8 h |
+| Résultats par journée | 8 h |
 | Feuille de match | 7 jours (résultats passés) |
 
 ---
@@ -116,37 +116,16 @@ $rencontres = apply_filters('dataping_get_rencontres_poule', null, [
 
 ---
 
-## Changelog
+## Documentation
 
-### En cours (dev)
-
-- Feuilles de match expandables (composition + résultats partie par partie)
-- Génération automatique de pages WordPress par équipe
-- Design tableau unifié (classement, résultats, joueurs)
-- Synchronisation avec logs d'API
-
-### v0.3.0
-
-- Optimisation des appels API (passage à `xml_licence_b.php`, suppression des endpoints inutiles)
-- Ajout des champs catégorie, étranger, progressions mensuelle et annuelle
-- Hooks WordPress pour exposer les données aux autres plugins
-- Gestion du cache via transients
-
-### v0.2.3
-
-- Correction de bugs divers
-- Affichage des résultats des joueurs
-
-### v0.1
-
-- Gestion des paramètres API
-- Affichage des résultats des équipes d'un club
-
----
-
-## Crédits
-
-Merci à [Vincent Bab](mailto:vincentbab@gmail.com) pour la classe originale d'accès à l'API FFTT, adaptée pour ce plugin.
+| Document | Description |
+|----------|-------------|
+| [CHANGELOG.md](CHANGELOG.md) | Historique des versions |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Comment contribuer |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Structure du code |
+| [docs/API-FFTT.md](docs/API-FFTT.md) | Référence des endpoints FFTT utilisés |
+| [docs/DEBUG.md](docs/DEBUG.md) | Diagnostic des problèmes de synchronisation |
+| [docs/TDD.md](docs/TDD.md) | Guide TDD pour contribuer |
 
 ---
 
